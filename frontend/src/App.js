@@ -8,8 +8,10 @@ import PlaceholderCreatePage from "main/pages/Placeholder/PlaceholderCreatePage"
 import PlaceholderEditPage from "main/pages/Placeholder/PlaceholderEditPage";
 
 import MyReviewsIndexPage from "main/pages/MyReviews/MyReviewsIndexPage";
+import MyReviewsCreatePage from "main/pages/MyReviews/MyReviewsCreatePage";
 
 import MealTimesPage from "main/pages/Meal/MealTimesPage";
+import MenuItemPage from "main/pages/MenuItem/MenuItemPage";
 
 import Moderate from "main/pages/Moderate";
 
@@ -17,7 +19,6 @@ import { hasRole, useCurrentUser } from "main/utils/currentUser";
 
 import "bootstrap/dist/css/bootstrap.css";
 import "react-toastify/dist/ReactToastify.css";
-import MenuItemPage from "main/pages/MenuItem/MenuItemPage";
 
 function App() {
   const { data: currentUser } = useCurrentUser();
@@ -27,54 +28,43 @@ function App() {
       <Routes>
         <Route exact path="/" element={<HomePage />} />
         <Route exact path="/profile" element={<ProfilePage />} />
+
         {hasRole(currentUser, "ROLE_ADMIN") && (
           <Route exact path="/admin/users" element={<AdminUsersPage />} />
         )}
+
         {hasRole(currentUser, "ROLE_USER") && (
           <>
             <Route exact path="/myreviews" element={<MyReviewsIndexPage />} />
+            <Route exact path="/myreviews/create" element={<MyReviewsCreatePage />} />
           </>
         )}
+
         {hasRole(currentUser, "ROLE_ADMIN") && (
           <Route exact path="/moderate" element={<Moderate />} />
         )}
+
         {hasRole(currentUser, "ROLE_USER") && (
-          <>
-            <Route
-              exact
-              path="/placeholder"
-              element={<PlaceholderIndexPage />}
-            />
-          </>
+          <Route exact path="/placeholder" element={<PlaceholderIndexPage />} />
         )}
+
         {hasRole(currentUser, "ROLE_ADMIN") && (
           <>
-            <Route
-              exact
-              path="/placeholder/edit/:id"
-              element={<PlaceholderEditPage />}
-            />
-            <Route
-              exact
-              path="/placeholder/create"
-              element={<PlaceholderCreatePage />}
-            />
+            <Route exact path="/placeholder/edit/:id" element={<PlaceholderEditPage />} />
+            <Route exact path="/placeholder/create" element={<PlaceholderCreatePage />} />
           </>
         )}
-        <>
-          <Route
-            exact
-            path="/diningcommons/:date-time/:dining-commons-code"
-            element={<MealTimesPage />}
-          />
-        </>
-        <>
-          <Route
-            exact
-            path="/diningcommons/:date-time/:dining-commons-code/:meal"
-            element={<MenuItemPage />}
-          />
-        </>
+
+        <Route
+          exact
+          path="/diningcommons/:date-time/:dining-commons-code"
+          element={<MealTimesPage />}
+        />
+        <Route
+          exact
+          path="/diningcommons/:date-time/:dining-commons-code/:meal"
+          element={<MenuItemPage />}
+        />
       </Routes>
     </BrowserRouter>
   );
