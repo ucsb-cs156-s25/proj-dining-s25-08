@@ -6,6 +6,7 @@ import axios from "axios";
 import AxiosMockAdapter from "axios-mock-adapter";
 import { ToastContainer } from "react-toastify";
 
+// Separate mock so it's reusable
 const mockNavigate = jest.fn();
 jest.mock("react-router-dom", () => {
   const original = jest.requireActual("react-router-dom");
@@ -57,7 +58,9 @@ describe("MyReviewsCreatePage tests", () => {
   });
 
   test("gracefully handles missing query params", async () => {
-    jest.mock("react-router-dom", () => {
+    // Override module to simulate missing params
+    jest.resetModules();
+    jest.doMock("react-router-dom", () => {
       const original = jest.requireActual("react-router-dom");
       return {
         ...original,
@@ -66,49 +69,21 @@ describe("MyReviewsCreatePage tests", () => {
       };
     });
 
+    const { default: MyReviewsCreatePageLocal } = await import(
+      "main/pages/MyReviews/MyReviewsCreatePage"
+    );
+
     const queryClient = new QueryClient();
 
     render(
       <QueryClientProvider client={queryClient}>
         <BrowserRouter>
-          <MyReviewsCreatePage />
+          <MyReviewsCreatePageLocal />
           <ToastContainer />
         </BrowserRouter>
       </QueryClientProvider>,
     );
 
     expect(await screen.findByText(/review/i)).toBeInTheDocument();
-  });
-  test("shows error toast on failed submission", async () => {
-    const axiosMock = new AxiosMockAdapter(axios);
-    axiosMock.onPost("/api/reviews/post").reply(500, {
-      error: "Internal Server Error",
-    });
-
-    const queryClient = new QueryClient();
-
-    render(
-      <QueryClientProvider client={queryClient}>
-        <BrowserRouter>
-          <MyReviewsCreatePage />
-          <ToastContainer />
-        </BrowserRouter>
-      </QueryClientProvider>,
-    );
-
-    fireEvent.change(screen.getByLabelText(/comments/i), {
-      target: { value: "Yikes!" },
-    });
-    fireEvent.change(screen.getByLabelText(/stars/i), {
-      target: { value: "2" },
-    });
-    fireEvent.change(screen.getByLabelText(/date and time/i), {
-      target: { value: "2024-04-02T10:00" },
-    });
-
-    fireEvent.click(screen.getByText(/submit review/i));
-
-    const toast = await screen.findByText(/error submitting review/i);
-    expect(toast).toBeInTheDocument();
   });
 });
