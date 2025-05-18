@@ -117,11 +117,11 @@ describe("MenuItemTable Tests", () => {
 
     fireEvent.click(button);
 
-    await waitFor(() => {
-      expect(mockNavigate).toHaveBeenCalledTimes(1);
+    await waitFor(() => expect(mockNavigate).toHaveBeenCalledTimes(1));
+    await waitFor(() =>
       expect(mockNavigate).toHaveBeenCalledWith(
         "/myreviews/create?itemId=1&itemName=Oatmeal%20(vgn)",
-      );
-    });
+      ),
+    );
   });
 });
