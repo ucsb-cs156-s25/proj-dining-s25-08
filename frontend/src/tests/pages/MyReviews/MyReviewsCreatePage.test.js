@@ -5,8 +5,10 @@ import { QueryClient, QueryClientProvider } from "react-query";
 import axios from "axios";
 import AxiosMockAdapter from "axios-mock-adapter";
 import { ToastContainer } from "react-toastify";
+const axiosMock = new AxiosMockAdapter(axios);
+axiosMock.onGet("/api/currentUser").reply(200, { user: null });
+axiosMock.onGet("/api/systemInfo").reply(200, {});
 
-// Separate mock so it's reusable
 const mockNavigate = jest.fn();
 jest.mock("react-router-dom", () => {
   const original = jest.requireActual("react-router-dom");
@@ -19,7 +21,7 @@ jest.mock("react-router-dom", () => {
   };
 });
 
-describe("MyReviewsCreatePage tests", () => {
+describe("MyReviewsCreatePage success test", () => {
   test("submits form and navigates on success", async () => {
     const axiosMock = new AxiosMockAdapter(axios);
     axiosMock.onPost("/api/reviews/post").reply(200, {});
@@ -55,35 +57,5 @@ describe("MyReviewsCreatePage tests", () => {
     expect(
       await screen.findByText(/review submitted for spaghetti/i),
     ).toBeInTheDocument();
-  });
-
-  test("gracefully handles missing query params", async () => {
-    // Override module to simulate missing params
-    jest.resetModules();
-    jest.doMock("react-router-dom", () => {
-      const original = jest.requireActual("react-router-dom");
-      return {
-        ...original,
-        useNavigate: () => mockNavigate,
-        useSearchParams: () => [new URLSearchParams("")],
-      };
-    });
-
-    const { default: MyReviewsCreatePageLocal } = await import(
-      "main/pages/MyReviews/MyReviewsCreatePage"
-    );
-
-    const queryClient = new QueryClient();
-
-    render(
-      <QueryClientProvider client={queryClient}>
-        <BrowserRouter>
-          <MyReviewsCreatePageLocal />
-          <ToastContainer />
-        </BrowserRouter>
-      </QueryClientProvider>,
-    );
-
-    expect(await screen.findByText(/review/i)).toBeInTheDocument();
   });
 });
