@@ -8,7 +8,9 @@ export default function MenuItemTable({ menuItems, currentUser }) {
 
   const reviewCallback = (cell) => {
     const item = cell.row.original;
-    navigate(`/myreviews/create?itemId=${item.id}&itemName=${encodeURIComponent(item.name)}`);
+    navigate(
+      `/myreviews/create?itemId=${item.id}&itemName=${encodeURIComponent(item.name)}`,
+    );
   };
 
   const columns = [

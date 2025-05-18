@@ -21,7 +21,12 @@ export default function ReviewForm({ initialItemName, submitAction }) {
     <Form onSubmit={handleSubmit}>
       <Form.Group className="mb-3">
         <Form.Label htmlFor="review-item-name">Item Name</Form.Label>
-        <Form.Control id="review-item-name" type="text" value={initialItemName} disabled />
+        <Form.Control
+          id="review-item-name"
+          type="text"
+          value={initialItemName}
+          disabled
+        />
       </Form.Group>
 
       <Form.Group className="mb-3">
@@ -43,13 +48,17 @@ export default function ReviewForm({ initialItemName, submitAction }) {
           onChange={(e) => setStars(Number(e.target.value))}
         >
           {[1, 2, 3, 4, 5].map((num) => (
-            <option key={num} value={num}>{num}</option>
+            <option key={num} value={num}>
+              {num}
+            </option>
           ))}
         </Form.Select>
       </Form.Group>
 
       <Form.Group className="mb-3">
-        <Form.Label htmlFor="review-date">Date and Time Item was Served</Form.Label>
+        <Form.Label htmlFor="review-date">
+          Date and Time Item was Served
+        </Form.Label>
         <Form.Control
           id="review-date"
           type="datetime-local"

@@ -36,7 +36,11 @@ function App() {
         {hasRole(currentUser, "ROLE_USER") && (
           <>
             <Route exact path="/myreviews" element={<MyReviewsIndexPage />} />
-            <Route exact path="/myreviews/create" element={<MyReviewsCreatePage />} />
+            <Route
+              exact
+              path="/myreviews/create"
+              element={<MyReviewsCreatePage />}
+            />
           </>
         )}
 
@@ -50,8 +54,16 @@ function App() {
 
         {hasRole(currentUser, "ROLE_ADMIN") && (
           <>
-            <Route exact path="/placeholder/edit/:id" element={<PlaceholderEditPage />} />
-            <Route exact path="/placeholder/create" element={<PlaceholderCreatePage />} />
+            <Route
+              exact
+              path="/placeholder/edit/:id"
+              element={<PlaceholderEditPage />}
+            />
+            <Route
+              exact
+              path="/placeholder/create"
+              element={<PlaceholderCreatePage />}
+            />
           </>
         )}
 

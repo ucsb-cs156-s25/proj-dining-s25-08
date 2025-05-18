@@ -12,7 +12,6 @@ export default function MyReviewsIndexPage() {
         <p>
           <a href="/placeholder/edit/1">Edit</a>
         </p>
-        
       </div>
     </BasicLayout>
   );

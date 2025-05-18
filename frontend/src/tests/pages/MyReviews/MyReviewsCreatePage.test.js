@@ -12,7 +12,9 @@ jest.mock("react-router-dom", () => {
   return {
     ...original,
     useNavigate: () => mockNavigate,
-    useSearchParams: () => [new URLSearchParams("itemId=42&itemName=Spaghetti")],
+    useSearchParams: () => [
+      new URLSearchParams("itemId=42&itemName=Spaghetti"),
+    ],
   };
 });
 
@@ -29,7 +31,7 @@ describe("MyReviewsCreatePage tests", () => {
           <MyReviewsCreatePage />
           <ToastContainer />
         </BrowserRouter>
-      </QueryClientProvider>
+      </QueryClientProvider>,
     );
 
     fireEvent.change(screen.getByLabelText(/comments/i), {
@@ -44,36 +46,69 @@ describe("MyReviewsCreatePage tests", () => {
 
     fireEvent.click(screen.getByText(/submit review/i));
 
-    await waitFor(() => {
-      expect(axiosMock.history.post.length).toBe(1);
-      expect(mockNavigate).toHaveBeenCalledWith("/myreviews");
-    });
+    await waitFor(() => expect(axiosMock.history.post.length).toBe(1));
+    await waitFor(() =>
+      expect(mockNavigate).toHaveBeenCalledWith("/myreviews"),
+    );
 
-    expect(await screen.findByText(/review submitted for spaghetti/i)).toBeInTheDocument();
+    expect(
+      await screen.findByText(/review submitted for spaghetti/i),
+    ).toBeInTheDocument();
   });
 
   test("gracefully handles missing query params", async () => {
-    jest.resetModules();
-    jest.doMock("react-router-dom", () => {
+    jest.mock("react-router-dom", () => {
       const original = jest.requireActual("react-router-dom");
       return {
         ...original,
-        useNavigate: () => jest.fn(),
+        useNavigate: () => mockNavigate,
         useSearchParams: () => [new URLSearchParams("")],
       };
     });
 
-    const MyReviewsCreatePageNoParams = require("main/pages/MyReviews/MyReviewsCreatePage").default;
-
     const queryClient = new QueryClient();
+
     render(
       <QueryClientProvider client={queryClient}>
         <BrowserRouter>
-          <MyReviewsCreatePageNoParams />
+          <MyReviewsCreatePage />
+          <ToastContainer />
         </BrowserRouter>
-      </QueryClientProvider>
+      </QueryClientProvider>,
     );
 
-    expect(screen.getByText(/review:/i)).toBeInTheDocument();
+    expect(await screen.findByText(/review/i)).toBeInTheDocument();
+  });
+  test("shows error toast on failed submission", async () => {
+    const axiosMock = new AxiosMockAdapter(axios);
+    axiosMock.onPost("/api/reviews/post").reply(500, {
+      error: "Internal Server Error",
+    });
+
+    const queryClient = new QueryClient();
+
+    render(
+      <QueryClientProvider client={queryClient}>
+        <BrowserRouter>
+          <MyReviewsCreatePage />
+          <ToastContainer />
+        </BrowserRouter>
+      </QueryClientProvider>,
+    );
+
+    fireEvent.change(screen.getByLabelText(/comments/i), {
+      target: { value: "Yikes!" },
+    });
+    fireEvent.change(screen.getByLabelText(/stars/i), {
+      target: { value: "2" },
+    });
+    fireEvent.change(screen.getByLabelText(/date and time/i), {
+      target: { value: "2024-04-02T10:00" },
+    });
+
+    fireEvent.click(screen.getByText(/submit review/i));
+
+    const toast = await screen.findByText(/error submitting review/i);
+    expect(toast).toBeInTheDocument();
   });
 });

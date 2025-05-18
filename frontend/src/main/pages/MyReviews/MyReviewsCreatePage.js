@@ -24,7 +24,9 @@ export default function MyReviewsCreatePage() {
       toast(`Review submitted for ${itemName}`);
       navigate("/myreviews");
     } catch (err) {
-      toast.error(`Error submitting review: ${err.response?.data?.error || err.message}`);
+      toast.error(
+        `Error submitting review: ${err.response?.data?.error || err.message}`,
+      );
     }
   };
 

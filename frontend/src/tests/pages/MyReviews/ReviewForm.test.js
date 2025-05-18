@@ -4,7 +4,9 @@ import ReviewForm from "main/components/MyReviews/ReviewForm";
 describe("ReviewForm tests", () => {
   const setup = () => {
     const mockSubmit = jest.fn();
-    render(<ReviewForm initialItemName="Spaghetti" submitAction={mockSubmit} />);
+    render(
+      <ReviewForm initialItemName="Spaghetti" submitAction={mockSubmit} />,
+    );
     return { mockSubmit };
   };
 
@@ -57,7 +59,7 @@ describe("ReviewForm tests", () => {
     fireEvent.click(screen.getByRole("button", { name: /submit review/i }));
 
     expect(mockSubmit).toHaveBeenCalledWith(
-      expect.objectContaining({ itemsStars: 3 })
+      expect.objectContaining({ itemsStars: 3 }),
     );
   });
 
