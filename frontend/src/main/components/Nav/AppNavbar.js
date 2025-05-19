@@ -83,7 +83,7 @@ export default function AppNavbar({
               {currentUser && currentUser.loggedIn ? (
                 <>
                   <Navbar.Text className="me-3" as={Link} to="/profile">
-                    Welcome, {currentUser?.root?.user?.email ?? "User"}
+                    Welcome, {currentUser.root.user.email}
                   </Navbar.Text>
                   <Button onClick={doLogout}>Log Out</Button>
                 </>
