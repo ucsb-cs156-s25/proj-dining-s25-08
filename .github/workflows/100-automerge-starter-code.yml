@@ -154,7 +154,7 @@ jobs:
   send-to-slack:
     name: Send Report to Slack
     runs-on: ubuntu-latest
-    needs: [get_team_name, check_date]
+    needs: [get_team_name, check_date, automerge]
     if: needs.check_date.outputs.continue == 'true'
     steps:
       #This step is used to debug the environment variables and Slack text
@@ -164,6 +164,22 @@ jobs:
           echo "ORG_NAME: ${{ env.ORG_NAME }}"
           echo "Slack Channel: ${{ fromJSON(env.TEAM_TO_CHANNEL)[needs.get_team_name.outputs.team] }}"
    
+      - name: Setup conditional strings
+        id: set_message
+        run: |
+          if [ "$MERGED" = "true" ]; then
+            echo "message=✅ Merge successful! ✅" >> $GITHUB_OUTPUT
+          elif [ "$MERGE_CONFLICT" = "true" ]; then
+            echo "message=⚠️ Merge conflict detected. ⚠️" >> $GITHUB_OUTPUT
+          else
+            echo "message=❌ No changes or merge failed. ❌" >> $GITHUB_OUTPUT
+          fi
+        env:
+          MERGED: ${{ needs.automerge.outputs.merged }}
+          MERGE_CONFLICT: ${{ needs.automerge.outputs.merge_conflict }}
+
+
+
       #This step sends the report to the Slack channel associated with the team
       - name: Send Report to Slack
         uses: archive/github-actions-slack@v2.10.1
@@ -177,7 +193,7 @@ jobs:
                   "type": "section",
                   "text": {
                     "type": "mrkdwn",
-                    "text": "⚖️🤝💭 *Weekly Reflection Prompt* 💭🤝⚖️"
+                    "text": "# Automerge Starter Code Job:"
                   }
                 },
                 {
@@ -187,60 +203,8 @@ jobs:
                   "type": "section",
                   "text": {
                     "type": "mrkdwn",
-                    "text": "Hey team! It's time for our weekly reflection on contributions and team dynamics. Consider the following things:"
+                    "text": "${{ steps.set_message.outputs.message }}"
                   }
-                },
-  
-                {
-                  "type": "context",
-                  "elements": [{
-                    "type": "mrkdwn",
-                    "text": "> (1) What *factors* does the team think are important in evaluating individual contributions (e.g. size, complexity, scope of various tasks, individual circumstances, etc.)"
-                  }]
-                },
-                {
-                  "type": "context",
-                  "elements": [{
-                    "type": "mrkdwn",
-                    "text": "> (2) Is each of us contributing in a *fair and equitable* way to finishing the work that needs to be done? (including coding, code review and other contributions)?"
-                  }]
-                },
-                {
-                  "type": "context",
-                  "elements": [{
-                    "type": "mrkdwn",
-                    "text": "> (3) Are we holding each other *accountable*?"
-                  }]
-                },
-                {
-                  "type": "context",
-                  "elements": [{
-                    "type": "mrkdwn",
-                    "text": "> (4) Is each of us doing *high quality* work?"
-                  }]
-                },
-         
-                {
-                  "type": "section",
-                  "text": {
-                    "type": "mrkdwn",
-                    "text": "To earn credit for this graded participation activity, each team member is required to respond to this post (by *replying on this thread*; click the `Reply in thread` button) with a few sentences that address these points, and then participate in a brief group discussion on this thread (responding to what others have said)."
-                  }
-                },
-                {
-                  "type": "divider"
-                },
-                {
-                  "type": "context",
-                  "elements": [
-                    {
-                      "type": "mrkdwn",
-                      "text": "For more info and an example, see: <https://ucsb-cs156.github.io/s25/info/reflection.html>"
-                    }
-                  ]
-                },
-                {
-                  "type": "divider"
                 },
               ]
 
