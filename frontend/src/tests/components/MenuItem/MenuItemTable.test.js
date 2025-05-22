@@ -68,11 +68,21 @@ describe("MenuItemTable Tests", () => {
       </MemoryRouter>,
     );
 
-    expect(screen.getByTestId(`MenuItemTable-cell-row-0-col-averageRating`)).toHaveTextContent("4.5");
-    expect(screen.getByTestId(`MenuItemTable-cell-row-1-col-averageRating`)).toHaveTextContent("No reviews");
-    expect(screen.getByTestId(`MenuItemTable-cell-row-2-col-averageRating`)).toHaveTextContent("3.5");
-    expect(screen.getByTestId(`MenuItemTable-cell-row-3-col-averageRating`)).toHaveTextContent("5.0");
-    expect(screen.getByTestId(`MenuItemTable-cell-row-4-col-averageRating`)).toHaveTextContent("No reviews");
+    expect(
+      screen.getByTestId(`MenuItemTable-cell-row-0-col-averageRating`),
+    ).toHaveTextContent("4.5");
+    expect(
+      screen.getByTestId(`MenuItemTable-cell-row-1-col-averageRating`),
+    ).toHaveTextContent("No reviews");
+    expect(
+      screen.getByTestId(`MenuItemTable-cell-row-2-col-averageRating`),
+    ).toHaveTextContent("3.5");
+    expect(
+      screen.getByTestId(`MenuItemTable-cell-row-3-col-averageRating`),
+    ).toHaveTextContent("5.0");
+    expect(
+      screen.getByTestId(`MenuItemTable-cell-row-4-col-averageRating`),
+    ).toHaveTextContent("No reviews");
 
     for (let i = 0; i < fiveMenuItems.length; i++) {
       expect(
