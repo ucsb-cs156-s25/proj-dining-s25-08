@@ -43,6 +43,9 @@ describe("MenuItemTable Tests", () => {
       screen.getByTestId("MenuItemTable-header-station"),
     ).toHaveTextContent("Station");
     expect(
+      screen.getByTestId("MenuItemTable-header-averageRating"),
+    ).toHaveTextContent("Average Rating");
+    expect(
       screen.queryByTestId("MenuItemTable-row-cell-0-col-name"),
     ).not.toBeInTheDocument();
     expect(
@@ -52,7 +55,8 @@ describe("MenuItemTable Tests", () => {
       screen.queryByTestId("MenuItemTable-cell-row-0-col-Review Item-button"),
     ).not.toBeInTheDocument();
   });
-  test("Renders 5 Menu Items Correctly correctly without buttons", async () => {
+
+  test("Renders 5 Menu Items Correctly with ratings", async () => {
     let fiveMenuItems = menuItemFixtures.fiveMenuItems;
     render(
       <MemoryRouter>
@@ -64,6 +68,12 @@ describe("MenuItemTable Tests", () => {
       </MemoryRouter>,
     );
 
+    expect(screen.getByTestId(`MenuItemTable-cell-row-0-col-averageRating`)).toHaveTextContent("4.5");
+    expect(screen.getByTestId(`MenuItemTable-cell-row-1-col-averageRating`)).toHaveTextContent("No reviews");
+    expect(screen.getByTestId(`MenuItemTable-cell-row-2-col-averageRating`)).toHaveTextContent("3.5");
+    expect(screen.getByTestId(`MenuItemTable-cell-row-3-col-averageRating`)).toHaveTextContent("5.0");
+    expect(screen.getByTestId(`MenuItemTable-cell-row-4-col-averageRating`)).toHaveTextContent("No reviews");
+
     for (let i = 0; i < fiveMenuItems.length; i++) {
       expect(
         screen.getByTestId(`MenuItemTable-cell-row-${i}-col-name`),
@@ -71,9 +81,6 @@ describe("MenuItemTable Tests", () => {
       expect(
         screen.getByTestId(`MenuItemTable-cell-row-${i}-col-station`),
       ).toHaveTextContent(fiveMenuItems[i].station);
-      expect(
-        screen.queryByTestId("MenuItemTable-cell-row-0-col-Review Item-button"),
-      ).not.toBeInTheDocument();
     }
   });
 
@@ -115,7 +122,7 @@ describe("MenuItemTable Tests", () => {
 
     fireEvent.click(allButton);
     await waitFor(() =>
-      expect(mockedNavigate).toHaveBeenCalledWith("/reviews/undefined"),
+      expect(mockedNavigate).toHaveBeenCalledWith("/reviews/1"),
     );
   });
 });
