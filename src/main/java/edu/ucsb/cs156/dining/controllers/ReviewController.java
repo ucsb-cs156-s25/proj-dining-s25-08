@@ -6,7 +6,6 @@ import edu.ucsb.cs156.dining.entities.User;
 import edu.ucsb.cs156.dining.errors.EntityNotFoundException;
 import edu.ucsb.cs156.dining.models.CurrentUser;
 import edu.ucsb.cs156.dining.models.EditedReview;
-import edu.ucsb.cs156.dining.models.Entree;
 import edu.ucsb.cs156.dining.repositories.MenuItemRepository;
 import edu.ucsb.cs156.dining.repositories.ReviewRepository;
 import edu.ucsb.cs156.dining.statuses.ModerationStatus;
@@ -35,15 +34,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.server.ResponseStatusException;
-
-import com.nimbusds.openid.connect.sdk.claims.UserInfo;
 
 import jakarta.validation.Valid;
-
-/**
- * This is a REST controller for Reviews
- */
 
 @Tag(name = "Review")
 @RequestMapping("/api/reviews")
@@ -64,11 +56,6 @@ public class ReviewController extends ApiController {
     @Autowired
     MenuItemRepository menuItemRepository;
 
-    /**
-     * This method returns a list of all Reviews.
-     * 
-     * @return a list of all Reviews
-     */
     @Operation(summary = "List all Reviews")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping("/all")
@@ -79,16 +66,6 @@ public class ReviewController extends ApiController {
         return reviews;
     }
 
-    /**
-     * This method allows a user to submit a review
-     * 
-     * @return message that says an review was added to the database
-     * @param itemId         id of the item
-     * @param dateItemServed localDataTime
-     *                       All others params must not be parameters and instead
-     *                       derived from data sources that are dynamic (Date), or
-     *                       set to be null or some other signifier
-     */
     @Operation(summary = "Create a new review")
     @PreAuthorize("hasRole('ROLE_USER')")
     @PostMapping("/post")
@@ -96,18 +73,16 @@ public class ReviewController extends ApiController {
             @Parameter(name = "itemId") @RequestParam long itemId,
             @Parameter(description = "Comments by the reviewer, can be blank") @RequestParam(required = false) String reviewerComments,
             @Parameter(name = "itemsStars") @RequestParam Long itemsStars,
-            @Parameter(name = "dateItemServed", description = "date (in iso format, e.g. YYYY-mm-ddTHH:MM:SS; see https://en.wikipedia.org/wiki/ISO_8601)") @RequestParam("dateItemServed") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime dateItemServed) // For
-            throws JsonProcessingException {
+            @Parameter(name = "dateItemServed") @RequestParam("dateItemServed") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime dateItemServed
+    ) throws JsonProcessingException {
         LocalDateTime now = LocalDateTime.now();
         Review review = new Review();
         review.setDateItemServed(dateItemServed);
 
-        // Ensures content of truly empty and sets to null if so
-        if ((!reviewerComments.trim().isEmpty())) {
+        if ((reviewerComments != null) && !reviewerComments.trim().isEmpty()) {
             review.setReviewerComments(reviewerComments);
         }
 
-        // Ensure user inputs rating 1-5
         if (itemsStars < 1 || itemsStars > 5) {
             throw new IllegalArgumentException("Items stars must be between 1 and 5.");
         }
@@ -125,42 +100,56 @@ public class ReviewController extends ApiController {
         return review;
     }
 
-    /**
-     * This method allows a user to get a list of reviews that they have previously made.
-     * Only user can only get a list of their own reviews, and you cant request another persons reviews
-     * @return a list of reviews sent by a given user
-     */
     @Operation(summary = "Get all reviews a user has sent: only callable by the user")
     @PreAuthorize("hasRole('ROLE_USER')")
     @GetMapping("/userReviews")
-    public Iterable<Review> get_all_review_by_user_id(){
+    public Iterable<Review> get_all_review_by_user_id() {
         CurrentUser user = getCurrentUser();
         Iterable<Review> reviews = reviewRepository.findByReviewer(user.getUser());
         return reviews;
+    }
+
+    @Operation(summary = "Get an individual review by ID (only accessible by owner or admin)")
+    @PreAuthorize("hasRole('ROLE_USER')")
+    @GetMapping("/get")
+    public Review getReviewById(@RequestParam Long id) {
+        Review review = reviewRepository.findById(id).orElseThrow(
+            () -> new EntityNotFoundException(Review.class, id)
+        );
+
+        User current = getCurrentUser().getUser();
+
+        boolean isOwner = review.getReviewer().getId() == current.getId();
+        boolean isAdmin = Boolean.TRUE.equals(current.getAdmin());
+
+        if (!isOwner && !isAdmin) {
+            throw new AccessDeniedException("You do not have permission to access this review.");
+        }
+
+        return review;
     }
 
     @Operation(summary = "Edit a review")
     @PreAuthorize("hasRole('ROLE_USER')")
     @PutMapping("/reviewer")
     public Review editReview(@Parameter Long id, @RequestBody @Valid EditedReview incoming) {
-
         Review oldReview = reviewRepository.findById(id).orElseThrow(
                 () -> new EntityNotFoundException(Review.class, id)
         );
         User current = getCurrentUser().getUser();
-        if(current.getId() != oldReview.getReviewer().getId()) {
+        if (current.getId() != oldReview.getReviewer().getId()) {
             throw new AccessDeniedException("No permission to edit review");
         }
 
-        if(incoming.getItemStars() < 1 || incoming.getItemStars() > 5) {
+        if (incoming.getItemStars() < 1 || incoming.getItemStars() > 5) {
             throw new IllegalArgumentException("Items stars must be between 1 and 5.");
-        }else{
+        } else {
             oldReview.setItemsStars(incoming.getItemStars());
         }
 
-        if (incoming.getReviewerComments() != null &&!incoming.getReviewerComments().trim().isEmpty()) {
+        if (incoming.getReviewerComments() != null && !incoming.getReviewerComments().trim().isEmpty()) {
             oldReview.setReviewerComments(incoming.getReviewerComments());
-        }else{
+        } else {
             oldReview.setReviewerComments(null);
         }
 
@@ -170,7 +159,6 @@ public class ReviewController extends ApiController {
         oldReview.setModeratorComments(null);
 
         Review review = reviewRepository.save(oldReview);
-
         return review;
     }
 
@@ -183,7 +171,7 @@ public class ReviewController extends ApiController {
         );
 
         User current = getCurrentUser().getUser();
-        if(current.getId() != review.getReviewer().getId() && !current.getAdmin()) {
+        if (current.getId() != review.getReviewer().getId() && !current.getAdmin()) {
             throw new AccessDeniedException("No permission to delete review");
         }
 
@@ -213,4 +201,4 @@ public class ReviewController extends ApiController {
         Iterable<Review> reviewsList = reviewRepository.findByStatus(ModerationStatus.AWAITING_REVIEW);
         return reviewsList;
     }
-}
+} 
