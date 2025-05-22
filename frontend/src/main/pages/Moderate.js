@@ -4,7 +4,7 @@ import { Navigate } from "react-router-dom";
 import BasicLayout from "main/layouts/BasicLayout/BasicLayout";
 import AliasApprovalTable from "main/components/AliasApprovalTable/AliasApprovalTable";
 
-const Moderate = () => {
+export default function Moderate() {
   const { data: currentUser } = useCurrentUser();
 
   if (!currentUser.loggedIn || !hasRole(currentUser, "ROLE_ADMIN")) {
@@ -20,6 +20,4 @@ const Moderate = () => {
       </div>
     </BasicLayout>
   );
-};
-
-export default Moderate;
+}
