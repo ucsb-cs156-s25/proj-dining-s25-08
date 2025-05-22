@@ -13,10 +13,10 @@ export default function MenuItemTable({ menuItems, currentUser }) {
   };
 
   const calculateAverageRating = (reviews) => {
-    if (!reviews || reviews.length === 0) return "No reviews";
+    if (!reviews || !Array.isArray(reviews) || reviews.length === 0) return "No reviews";
     const validRatings = reviews
-      .filter((r) => r.itemsStars)
-      .map((r) => r.itemsStars);
+      .filter(r => r && typeof r === 'object' && typeof r.itemsStars === 'number')
+      .map(r => r.itemsStars);
     if (validRatings.length === 0) return "No ratings";
     const avg = validRatings.reduce((a, b) => a + b, 0) / validRatings.length;
     return avg.toFixed(1);
