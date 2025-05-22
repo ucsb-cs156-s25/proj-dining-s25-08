@@ -100,20 +100,20 @@ describe("MenuItemTable Tests", () => {
         id: 1,
         name: "Test Item 1",
         station: "Test Station",
-        reviews: [{ }, { itemsStars: null }] // Should show "No ratings"
+        reviews: [{}, { itemsStars: null }], // Should show "No ratings"
       },
       {
         id: 2,
         name: "Test Item 2",
         station: "Test Station",
-        reviews: [null, { itemsStars: 5 }] // Should still calculate average from valid rating
+        reviews: [null, { itemsStars: 5 }], // Should still calculate average from valid rating
       },
       {
         id: 3,
         name: "Test Item 3",
         station: "Test Station",
-        reviews: ["not an object", { itemsStars: 4 }] // Should handle invalid review objects
-      }
+        reviews: ["not an object", { itemsStars: 4 }], // Should handle invalid review objects
+      },
     ];
 
     render(
@@ -122,18 +122,24 @@ describe("MenuItemTable Tests", () => {
           menuItems={edgeCaseItems}
           currentUser={currentUserFixtures.notLoggedIn}
         />
-      </MemoryRouter>
+      </MemoryRouter>,
     );
 
-    expect(screen.getByTestId(`MenuItemTable-cell-row-0-col-averageRating`)).toHaveTextContent("No ratings");
-    expect(screen.getByTestId(`MenuItemTable-cell-row-1-col-averageRating`)).toHaveTextContent("5.0");
-    expect(screen.getByTestId(`MenuItemTable-cell-row-2-col-averageRating`)).toHaveTextContent("4.0");
+    expect(
+      screen.getByTestId(`MenuItemTable-cell-row-0-col-averageRating`),
+    ).toHaveTextContent("No ratings");
+    expect(
+      screen.getByTestId(`MenuItemTable-cell-row-1-col-averageRating`),
+    ).toHaveTextContent("5.0");
+    expect(
+      screen.getByTestId(`MenuItemTable-cell-row-2-col-averageRating`),
+    ).toHaveTextContent("4.0");
   });
 
   test("Navigation uses correct menu item id", async () => {
     const items = [
       { id: 42, name: "Test Item", station: "Test Station", reviews: [] },
-      { id: 43, name: "Test Item 2", station: "Test Station", reviews: [] }
+      { id: 43, name: "Test Item 2", station: "Test Station", reviews: [] },
     ];
 
     render(
@@ -142,17 +148,25 @@ describe("MenuItemTable Tests", () => {
           menuItems={items}
           currentUser={currentUserFixtures.userOnly}
         />
-      </MemoryRouter>
+      </MemoryRouter>,
     );
 
-    const firstItemButton = screen.getByTestId("MenuItemTable-cell-row-0-col-All Reviews-button");
-    const secondItemButton = screen.getByTestId("MenuItemTable-cell-row-1-col-All Reviews-button");
+    const firstItemButton = screen.getByTestId(
+      "MenuItemTable-cell-row-0-col-All Reviews-button",
+    );
+    const secondItemButton = screen.getByTestId(
+      "MenuItemTable-cell-row-1-col-All Reviews-button",
+    );
 
     fireEvent.click(firstItemButton);
-    await waitFor(() => expect(mockedNavigate).toHaveBeenCalledWith("/reviews/42"));
+    await waitFor(() =>
+      expect(mockedNavigate).toHaveBeenCalledWith("/reviews/42"),
+    );
 
     fireEvent.click(secondItemButton);
-    await waitFor(() => expect(mockedNavigate).toHaveBeenCalledWith("/reviews/43"));
+    await waitFor(() =>
+      expect(mockedNavigate).toHaveBeenCalledWith("/reviews/43"),
+    );
   });
 
   test("calculateAverageRating ignores non-number ratings", () => {
@@ -166,78 +180,167 @@ describe("MenuItemTable Tests", () => {
           { itemsStars: null },
           { itemsStars: "bad" },
           {}, // empty object
-          { itemsStars: 5 }
-        ]
-      }
+          { itemsStars: 5 },
+        ],
+      },
     ];
-  
+
     render(
       <MemoryRouter>
-        <MenuItemTable menuItems={items} currentUser={currentUserFixtures.notLoggedIn} />
-      </MemoryRouter>
+        <MenuItemTable
+          menuItems={items}
+          currentUser={currentUserFixtures.notLoggedIn}
+        />
+      </MemoryRouter>,
     );
-  
-    expect(screen.getByTestId("MenuItemTable-cell-row-0-col-averageRating")).toHaveTextContent("4.5");
+
+    expect(
+      screen.getByTestId("MenuItemTable-cell-row-0-col-averageRating"),
+    ).toHaveTextContent("4.5");
   });
-  
+
   test("returns 'No ratings' if all reviews are invalid", () => {
     const items = [
       {
         id: 2,
         name: "No Ratings",
         station: "Station X",
-        reviews: [{}, { itemsStars: null }, "bad"]
-      }
+        reviews: [{}, { itemsStars: null }, "bad"],
+      },
     ];
-  
+
     render(
       <MemoryRouter>
-        <MenuItemTable menuItems={items} currentUser={currentUserFixtures.notLoggedIn} />
-      </MemoryRouter>
+        <MenuItemTable
+          menuItems={items}
+          currentUser={currentUserFixtures.notLoggedIn}
+        />
+      </MemoryRouter>,
     );
-  
-    expect(screen.getByTestId("MenuItemTable-cell-row-0-col-averageRating")).toHaveTextContent("No ratings");
+
+    expect(
+      screen.getByTestId("MenuItemTable-cell-row-0-col-averageRating"),
+    ).toHaveTextContent("No ratings");
   });
-  
+
   test("calculates average rating with correct math and precision", () => {
     const items = [
       {
         id: 3,
         name: "Precise Item",
         station: "Station Math",
-        reviews: [
-          { itemsStars: 5 },
-          { itemsStars: 4 },
-          { itemsStars: 3 }
-        ]
-      }
+        reviews: [{ itemsStars: 5 }, { itemsStars: 4 }, { itemsStars: 3 }],
+      },
     ];
-  
+
     render(
       <MemoryRouter>
-        <MenuItemTable menuItems={items} currentUser={currentUserFixtures.notLoggedIn} />
-      </MemoryRouter>
+        <MenuItemTable
+          menuItems={items}
+          currentUser={currentUserFixtures.notLoggedIn}
+        />
+      </MemoryRouter>,
     );
-  
+
     // (5 + 4 + 3) / 3 = 4.0
-    expect(screen.getByTestId("MenuItemTable-cell-row-0-col-averageRating")).toHaveTextContent("4.0");
+    expect(
+      screen.getByTestId("MenuItemTable-cell-row-0-col-averageRating"),
+    ).toHaveTextContent("4.0");
   });
-  
+
   test("does not show buttons when user is not logged in", () => {
     const items = [
-      { id: 1, name: "Item A", station: "Station A", reviews: [] }
+      { id: 1, name: "Item A", station: "Station A", reviews: [] },
     ];
-  
+
     render(
       <MemoryRouter>
-        <MenuItemTable menuItems={items} currentUser={currentUserFixtures.notLoggedIn} />
-      </MemoryRouter>
+        <MenuItemTable
+          menuItems={items}
+          currentUser={currentUserFixtures.notLoggedIn}
+        />
+      </MemoryRouter>,
     );
-  
-    expect(screen.queryByTestId("MenuItemTable-cell-row-0-col-Review Item-button")).not.toBeInTheDocument();
-    expect(screen.queryByTestId("MenuItemTable-cell-row-0-col-All Reviews-button")).not.toBeInTheDocument();
+
+    expect(
+      screen.queryByTestId("MenuItemTable-cell-row-0-col-Review Item-button"),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByTestId("MenuItemTable-cell-row-0-col-All Reviews-button"),
+    ).not.toBeInTheDocument();
   });
-  
+
+  test("returns 'No reviews' when reviews is not an array", () => {
+    const items = [
+      {
+        id: 1,
+        name: "Invalid Reviews",
+        station: "Station A",
+        reviews: "not an array",
+      },
+    ];
+
+    render(
+      <MemoryRouter>
+        <MenuItemTable
+          menuItems={items}
+          currentUser={currentUserFixtures.notLoggedIn}
+        />
+      </MemoryRouter>,
+    );
+
+    expect(
+      screen.getByTestId("MenuItemTable-cell-row-0-col-averageRating"),
+    ).toHaveTextContent("No reviews");
+  });
+
+  test("ignores non-object entries in reviews array", () => {
+    const items = [
+      {
+        id: 2,
+        name: "Non-Object Reviews",
+        station: "Station B",
+        reviews: [null, 123, "bad", { itemsStars: 5 }],
+      },
+    ];
+
+    render(
+      <MemoryRouter>
+        <MenuItemTable
+          menuItems={items}
+          currentUser={currentUserFixtures.notLoggedIn}
+        />
+      </MemoryRouter>,
+    );
+
+    expect(
+      screen.getByTestId("MenuItemTable-cell-row-0-col-averageRating"),
+    ).toHaveTextContent("5.0");
+  });
+
+  test("calculates average rating correctly using addition", () => {
+    const items = [
+      {
+        id: 3,
+        name: "Addition Check",
+        station: "Station C",
+        reviews: [{ itemsStars: 2 }, { itemsStars: 4 }],
+      },
+    ];
+
+    render(
+      <MemoryRouter>
+        <MenuItemTable
+          menuItems={items}
+          currentUser={currentUserFixtures.notLoggedIn}
+        />
+      </MemoryRouter>,
+    );
+
+    expect(
+      screen.getByTestId("MenuItemTable-cell-row-0-col-averageRating"),
+    ).toHaveTextContent("3.0");
+  });
 
   test("Buttons work correctly", async () => {
     const mockAlert = jest.spyOn(window, "alert").mockImplementation(() => {});
