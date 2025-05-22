@@ -20,7 +20,7 @@ describe("AdminUsersPage tests", () => {
     axiosMock.resetHistory();
     axiosMock
       .onGet("/api/currentUser")
-      .reply(200, apiCurrentUserFixtures.userOnly);
+      .reply(200, apiCurrentUserFixtures.adminUser);
     axiosMock
       .onGet("/api/systemInfo")
       .reply(200, systemInfoFixtures.showingNeither);
