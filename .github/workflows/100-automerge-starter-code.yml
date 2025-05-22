@@ -100,6 +100,8 @@ jobs:
   
   automerge:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     outputs:
         merged: ${{ steps.merge_check.outputs.merged }}
         merge_conflict: ${{ steps.merge_check.outputs.merge_conflict }}
@@ -109,6 +111,11 @@ jobs:
         with:
           fetch-depth: 0                # fetch all history to allow merging
           token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set Git user for merge commits
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
 
       - name: Configure starter remote
         run: |
