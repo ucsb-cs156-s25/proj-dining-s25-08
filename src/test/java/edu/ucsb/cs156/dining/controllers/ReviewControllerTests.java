@@ -1074,6 +1074,55 @@ public void test_getReviewById_success_as_admin() throws Exception {
            .andExpect(jsonPath("$.id").value(55))
            .andExpect(jsonPath("$.reviewerComments").value("From other user"));
 }
+
+@WithMockUser(roles = {"USER"})
+@Test
+public void test_nullReviewerComments_on_creating_new_review() throws Exception {
+    // Arrange
+    LocalDateTime now = LocalDateTime.now();
+
+    User user = currentUserService.getUser();
+    MenuItem menuItem = MenuItem.builder().id(1L).build();
+
+    Review review = Review.builder()
+            .itemsStars(1L)
+            .reviewerComments(null)  // critical branch path
+            .dateItemServed(LocalDateTime.of(2021, 12, 12, 8, 8, 8))
+            .reviewer(user)
+            .status(ModerationStatus.AWAITING_REVIEW)
+            .item(menuItem)
+            .build();
+
+    Review reviewReturn = Review.builder()
+            .dateCreated(now)
+            .dateEdited(now)
+            .itemsStars(1L)
+            .reviewerComments(null)
+            .dateItemServed(LocalDateTime.of(2021, 12, 12, 8, 8, 8))
+            .reviewer(user)
+            .status(ModerationStatus.AWAITING_REVIEW)
+            .item(menuItem)
+            .id(0L)
+            .build();
+
+    when(reviewRepository.save(eq(review))).thenReturn(reviewReturn);
+
+    // Act
+    MvcResult response = mockMvc.perform(
+                    post("/api/reviews/post?itemId=1&itemsStars=1&dateItemServed=2021-12-12T08:08:08") // no reviewerComments param at all
+                            .with(csrf()))
+            .andExpect(status().isOk())
+            .andReturn();
+
+    String jsonReview = mapper.writeValueAsString(reviewReturn);
+
+    // Assert
+    verify(reviewRepository).save(any(Review.class));
+    String responseJson = response.getResponse().getContentAsString();
+
+    assertEquals(jsonReview, responseJson);
+}
+
     
 
 }
