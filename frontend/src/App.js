@@ -8,6 +8,8 @@ import PlaceholderCreatePage from "main/pages/Placeholder/PlaceholderCreatePage"
 import PlaceholderEditPage from "main/pages/Placeholder/PlaceholderEditPage";
 
 import MyReviewsIndexPage from "main/pages/MyReviews/MyReviewsIndexPage";
+import PostReviewPage from "main/pages/Reviews/PostReviewPage";
+import EditReviewPage from "main/pages/Reviews/EditReviewPage";
 
 import MealTimesPage from "main/pages/Meal/MealTimesPage";
 
@@ -33,6 +35,16 @@ function App() {
         {hasRole(currentUser, "ROLE_USER") && (
           <>
             <Route exact path="/myreviews" element={<MyReviewsIndexPage />} />
+            <Route
+              exact
+              path="/reviews/post/:id"
+              element={<PostReviewPage />}
+            />
+            <Route
+              exact
+              path="/reviews/edit/:id"
+              element={<EditReviewPage />}
+            />
           </>
         )}
         {hasRole(currentUser, "ROLE_ADMIN") && (
