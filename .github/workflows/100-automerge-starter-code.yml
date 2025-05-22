@@ -113,7 +113,7 @@ jobs:
       - name: Configure starter remote
         run: |
           git remote remove starter || true
-          git remote add starter https://github.com/ucsb-cs156/proj-dining.git # TODO: replace url with var?
+          git remote add starter https://github.com/giozucca/proj-dining-s25-08-TEST-FORK.git # TODO: replace url with var?
 
       - name: Fetch both remotes
         run: |
@@ -129,19 +129,22 @@ jobs:
       - name: Detect and merge starter changes
         id: merge_check
         run: |
-          # Count commits in starter/test-cherrypick not in scma-Test
-          cnt=$(git rev-list HEAD..starter/test-cherrypick --count)
-          echo "Found $cnt new commits in starter/test-cherrypick"
+          # Count commits in starter/main not in scma-Test
+          cnt=$(git rev-list HEAD..starter/main --count)
+          echo "Found $cnt new commits in starter/main"
           if [ "$cnt" -eq 0 ]; then
             echo "No changes to merge" >&2
             echo "merged=false" >> $GITHUB_OUTPUT
+            echo "merge_conflict=false" >> $GITHUB_OUTPUT
           else
             # Attempt non-interactive merge with custom message
-            if git merge --no-edit -m "Automated daily merge from starter" starter/test-cherrypick; then
+            if git merge --no-edit -m "Automated daily merge from starter" starter/main; then
               echo "Merge succeeded" >&2
               echo "merged=true" >> $GITHUB_OUTPUT
+              echo "merge_conflict=false" >> $GITHUB_OUTPUT
             else
               echo "Merge conflict!" >&2
+              echo "merged=false" >> $GITHUB_OUTPUT
               echo "merge_conflict=true" >> $GITHUB_OUTPUT
               exit 1
             fi
@@ -165,16 +168,20 @@ jobs:
           echo "TEAM_TO_CHANNEL: ${{ env.TEAM_TO_CHANNEL }}"
           echo "ORG_NAME: ${{ env.ORG_NAME }}"
           echo "Slack Channel: ${{ fromJSON(env.TEAM_TO_CHANNEL)[needs.get_team_name.outputs.team] }}"
-   
+          echo "Merged: ${{ needs.automerge.outputs.merged }}" 
+          echo "Merge_Conflict: ${{ needs.automerge.outputs.merge_conflict }}
+
       - name: Setup conditional strings
         id: set_message
         run: |
-          if [ "$MERGED" = "true" ]; then
+          if [[ "$MERGED" = "true" && "$MERGE_CONFLICT" = "false" ]]; then
             echo "message=✅ Merge successful! ✅" >> $GITHUB_OUTPUT
-          elif [ "$MERGE_CONFLICT" = "true" ]; then
+          elif [[ "$MERGED" = "false" && "$MERGE_CONFLICT" = "true" ]]; then
             echo "message=⚠️ Merge conflict detected. ⚠️" >> $GITHUB_OUTPUT
+          elif [[ "$MERGED" = "false" && "$MERGE_CONFLICT" = "false" ]]; then
+            echo "Something went wrong; Please check the logs for this action."
           else
-            echo "message=❌ No changes or merge failed. ❌" >> $GITHUB_OUTPUT
+            echo "message=No changes have been found in the starter repo" >> $GITHUB_OUTPUT
           fi
         env:
           MERGED: ${{ needs.automerge.outputs.merged }}
