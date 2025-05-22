@@ -98,6 +98,9 @@ jobs:
   
   automerge:
     runs-on: ubuntu-latest
+    outputs:
+        merged: ${{ steps.merge_check.outputs.merged }}
+        merge_conflict: ${{ steps.merge_check.outputs.merge_conflict }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -137,6 +140,7 @@ jobs:
               echo "merged=true" >> $GITHUB_OUTPUT
             else
               echo "Merge conflict!" >&2
+              echo "merge_conflict=true" >> $GITHUB_OUTPUT
               exit 1
             fi
           fi
