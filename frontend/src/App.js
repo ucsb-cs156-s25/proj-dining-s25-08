@@ -46,11 +46,7 @@ function App() {
               path="/myreviews/create"
               element={<MyReviewsCreatePage />}
             />
-            <Route
-              exact
-              path="/reviews/:itemid"
-              element={<ReviewsPage />}
-            />
+            <Route exact path="/reviews/:itemid" element={<ReviewsPage />} />
           </>
         )}
 
@@ -61,11 +57,7 @@ function App() {
 
         {/* User-only placeholder */}
         {hasRole(currentUser, "ROLE_USER") && (
-          <Route
-            exact
-            path="/placeholder"
-            element={<PlaceholderIndexPage />}
-          />
+          <Route exact path="/placeholder" element={<PlaceholderIndexPage />} />
         )}
 
         {/* Admin-only placeholder edits/creates */}

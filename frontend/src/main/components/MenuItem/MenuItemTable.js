@@ -12,8 +12,8 @@ export default function MenuItemTable({ menuItems, currentUser }) {
     const item = cell.row.original;
     navigate(
       `/myreviews/create?itemId=${item.id}&itemName=${encodeURIComponent(
-        item.name
-      )}`
+        item.name,
+      )}`,
     );
   };
 
@@ -36,11 +36,9 @@ export default function MenuItemTable({ menuItems, currentUser }) {
 
   if (hasRole(currentUser, "ROLE_USER")) {
     columns.push(
-      ButtonColumn("Review Item", "warning", reviewCallback, testid)
+      ButtonColumn("Review Item", "warning", reviewCallback, testid),
     );
-    columns.push(
-      ButtonColumn("All Reviews", "warning", viewCallback, testid)
-    );
+    columns.push(ButtonColumn("All Reviews", "warning", viewCallback, testid));
   }
 
   return <OurTable columns={columns} data={menuItems} testid={testid} />;
