@@ -111,7 +111,7 @@ jobs:
       - name: Configure starter remote
         run: |
           git remote remove starter || true
-          git remote add starter https://github.com/OWNER/STARTER_REPO.git # TODO: replace url with var?
+          git remote add starter https://github.com/ucsb-cs156/proj-dining.git # TODO: replace url with var?
 
       - name: Fetch both remotes
         run: |
