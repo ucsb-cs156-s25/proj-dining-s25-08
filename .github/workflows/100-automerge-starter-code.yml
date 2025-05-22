@@ -129,15 +129,15 @@ jobs:
       - name: Detect and merge starter changes
         id: merge_check
         run: |
-          # Count commits in starter/main not in scma-Test
-          cnt=$(git rev-list HEAD..starter/main --count)
-          echo "Found $cnt new commits in starter/main"
+          # Count commits in starter/test-cherrypick not in scma-Test
+          cnt=$(git rev-list HEAD..starter/test-cherrypick --count)
+          echo "Found $cnt new commits in starter/test-cherrypick"
           if [ "$cnt" -eq 0 ]; then
             echo "No changes to merge" >&2
             echo "merged=false" >> $GITHUB_OUTPUT
           else
             # Attempt non-interactive merge with custom message
-            if git merge --no-edit -m "Automated daily merge from starter" starter/main; then
+            if git merge --no-edit -m "Automated daily merge from starter" starter/test-cherrypick; then
               echo "Merge succeeded" >&2
               echo "merged=true" >> $GITHUB_OUTPUT
             else
