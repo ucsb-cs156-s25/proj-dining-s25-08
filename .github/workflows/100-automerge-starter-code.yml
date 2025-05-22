@@ -118,16 +118,16 @@ jobs:
           git fetch origin
           git fetch starter
 
-      - name: Checkout main branch
-        run: git checkout main
+      - name: Checkout scma-Test branch
+        run: git checkout scma-Test
 
-      - name: Ensure main is up-to-date
-        run: git pull --ff-only origin main
+      - name: Ensure scma-Test is up-to-date
+        run: git pull --ff-only origin scma-Test
 
       - name: Detect and merge starter changes
         id: merge_check
         run: |
-          # Count commits in starter/main not in main
+          # Count commits in starter/main not in scma-Test
           cnt=$(git rev-list HEAD..starter/main --count)
           echo "Found $cnt new commits in starter/main"
           if [ "$cnt" -eq 0 ]; then
@@ -147,7 +147,7 @@ jobs:
 
       - name: Push merged changes
         if: steps.merge_check.outputs.merged == 'true'
-        run: git push origin main
+        run: git push origin scma-Test
 
           
 
