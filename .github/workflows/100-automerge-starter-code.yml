@@ -187,7 +187,7 @@ jobs:
             echo "no_changes=true" >> $GITHUB_OUTPUT
           else
             # Attempt non-interactive merge with custom message
-            if git merge --no-edit -m "Automated daily merge from starter" starter/main; then
+            if git merge --no-edit -m "AUTOMERGE ACTION: Automated daily merge from starter" starter/main; then
               echo "Merge succeeded" >&2
               echo "merged=true" >> $GITHUB_OUTPUT
               echo "merge_conflict=false" >> $GITHUB_OUTPUT
@@ -197,7 +197,6 @@ jobs:
               echo "merged=false" >> $GITHUB_OUTPUT
               echo "merge_conflict=true" >> $GITHUB_OUTPUT
               echo "no_changes=false" >> $GITHUB_OUTPUT
-              exit 1
             fi
           fi
 
