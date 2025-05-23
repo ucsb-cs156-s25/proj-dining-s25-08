@@ -38,6 +38,7 @@ public class User {
  private String locale;
  private String hostedDomain;
  private boolean admin;
+ private boolean moderator;
  private String alias;
  private String proposedAlias;
  @Enumerated(EnumType.STRING)
@@ -50,10 +51,10 @@ public class User {
  private List&lt;Review&gt; reviews;
  
  public String getAlias() {
-<span class="fc bfc" id="L53" title="All 2 branches covered.">        if (this.alias == null) {</span>
-<span class="fc" id="L54">            this.alias = &quot;Anonymous User&quot;; </span>
+<span class="fc bfc" id="L54" title="All 2 branches covered.">        if (this.alias == null) {</span>
+<span class="fc" id="L55">            this.alias = &quot;Anonymous User&quot;; </span>
         }
-<span class="fc" id="L56">        return this.alias;</span>
+<span class="fc" id="L57">        return this.alias;</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
