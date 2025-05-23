@@ -13,9 +13,6 @@ export default function MenuItemTable({ menuItems, currentUser }) {
     );
   };
 
-  const reviewCallback = async (_cell) => {
-    alert("Reviews coming soon!");
-  };
   const viewCallback = async (_cell) => {
     navigate(`/reviews/${_cell.row.original.id}`);
   };
