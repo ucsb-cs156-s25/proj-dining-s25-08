@@ -226,8 +226,7 @@ jobs:
           echo "Merged: ${{ needs.automerge.outputs.merged }}" 
           echo "Merge_Conflict: ${{ needs.automerge.outputs.merge_conflict }}"
           echo "No Changes: ${{ needs.automerge.outputs.no_changes }}"
-
-
+   
       - name: Setup conditional strings
         id: set_message
         run: |
