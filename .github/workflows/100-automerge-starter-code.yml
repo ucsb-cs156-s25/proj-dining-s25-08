@@ -121,6 +121,7 @@ jobs:
     outputs:
         merged: ${{ steps.merge_check.outputs.merged }}
         merge_conflict: ${{ steps.merge_check.outputs.merge_conflict }}
+        no_changes: ${{ steps.merge_check.outputs.no_changes }}
     env:
       GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
     permissions:
@@ -183,16 +184,19 @@ jobs:
             echo "No changes to merge" >&2
             echo "merged=false" >> $GITHUB_OUTPUT
             echo "merge_conflict=false" >> $GITHUB_OUTPUT
+            echo "no_changes=true" >> $GITHUB_OUTPUT
           else
             # Attempt non-interactive merge with custom message
             if git merge --no-edit -m "Automated daily merge from starter" starter/main; then
               echo "Merge succeeded" >&2
               echo "merged=true" >> $GITHUB_OUTPUT
               echo "merge_conflict=false" >> $GITHUB_OUTPUT
+              echo "no_changes=false" >> $GITHUB_OUTPUT
             else
               echo "Merge conflict!" >&2
               echo "merged=false" >> $GITHUB_OUTPUT
               echo "merge_conflict=true" >> $GITHUB_OUTPUT
+              echo "no_changes=false" >> $GITHUB_OUTPUT
               exit 1
             fi
           fi
@@ -216,7 +220,8 @@ jobs:
           echo "ORG_NAME: ${{ env.ORG_NAME }}"
           echo "Slack Channel: ${{ fromJSON(env.TEAM_TO_CHANNEL)[needs.get_team_name.outputs.team] }}"
           echo "Merged: ${{ needs.automerge.outputs.merged }}" 
-          echo "Merge_Conflict: ${{ needs.automerge.outputs.merge_conflict }}
+          echo "Merge_Conflict: ${{ needs.automerge.outputs.merge_conflict }}"
+          echo "No Changes: ${{ needs.automerge.outputs.no_changes }}"
    
       - name: Setup conditional strings
         id: set_message
@@ -225,10 +230,10 @@ jobs:
             echo "message=✅ Merge successful! ✅" >> $GITHUB_OUTPUT
           elif [[ "$MERGED" = "false" && "$MERGE_CONFLICT" = "true" ]]; then
             echo "message=⚠️ Merge conflict detected. ⚠️" >> $GITHUB_OUTPUT
-          elif [[ "$MERGED" = "false" && "$MERGE_CONFLICT" = "false" ]]; then
-            echo "Something went wrong; Please check the logs for this action."
-          else
+          elif [[ "$NO_CHANGES" ]]; then
             echo "message=No changes have been found in the starter repo" >> $GITHUB_OUTPUT
+          else
+            echo "message=Unexpected error when attempting to merge from starter; Please check the logs for this action." >> $GITHUB_OUTPUT  
           fi
         env:
           MERGED: ${{ needs.automerge.outputs.merged }}
