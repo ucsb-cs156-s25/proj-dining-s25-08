@@ -36,11 +36,20 @@ describe("ModeratePage tests", () => {
 
     renderPage();
 
-    // Single assertion inside waitFor
     await screen.findByText("Moderation Page");
-    // Additional assertion outside waitFor
+
     expect(
-      screen.getByText("This page is accessible only to admins. (Placeholder)"),
+      screen.getByText("Below are all users awaiting alias approval:"),
+    ).toBeInTheDocument();
+
+    expect(
+      screen.getByRole("columnheader", { name: /Proposed Alias/i }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("columnheader", { name: /Approve/i }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("columnheader", { name: /Reject/i }),
     ).toBeInTheDocument();
   });
 
@@ -55,15 +64,12 @@ describe("ModeratePage tests", () => {
 
     renderPage();
 
-    // Single assertion inside waitFor
     await waitFor(() =>
       expect(screen.queryByText("Moderation Page")).not.toBeInTheDocument(),
     );
-    // Additional assertion outside waitFor
+
     expect(
-      screen.queryByText(
-        "This page is accessible only to admins. (Placeholder)",
-      ),
+      screen.queryByText("Below are all users awaiting alias approval:"),
     ).not.toBeInTheDocument();
   });
 
@@ -75,15 +81,12 @@ describe("ModeratePage tests", () => {
 
     renderPage();
 
-    // Single assertion inside waitFor
     await waitFor(() =>
       expect(screen.queryByText("Moderation Page")).not.toBeInTheDocument(),
     );
-    // Additional assertion outside waitFor
+
     expect(
-      screen.queryByText(
-        "This page is accessible only to admins. (Placeholder)",
-      ),
+      screen.queryByText("Below are all users awaiting alias approval:"),
     ).not.toBeInTheDocument();
   });
 
@@ -97,15 +100,12 @@ describe("ModeratePage tests", () => {
 
     renderPage();
 
-    // Single assertion inside waitFor
     await waitFor(() =>
       expect(screen.queryByText("Moderation Page")).not.toBeInTheDocument(),
     );
-    // Additional assertion outside waitFor
+
     expect(
-      screen.queryByText(
-        "This page is accessible only to admins. (Placeholder)",
-      ),
+      screen.queryByText("Below are all users awaiting alias approval:"),
     ).not.toBeInTheDocument();
   });
 
@@ -119,15 +119,12 @@ describe("ModeratePage tests", () => {
 
     renderPage();
 
-    // Single assertion inside waitFor
     await waitFor(() =>
       expect(screen.queryByText("Moderation Page")).not.toBeInTheDocument(),
     );
-    // Additional assertion outside waitFor
+
     expect(
-      screen.queryByText(
-        "This page is accessible only to admins. (Placeholder)",
-      ),
+      screen.queryByText("Below are all users awaiting alias approval:"),
     ).not.toBeInTheDocument();
   });
 });
