@@ -86,6 +86,10 @@ jobs:
             echo "Contents of $GITHUB_OUTPUT:"
             cat "$GITHUB_OUTPUT"
           fi
+
+          echo "Owner is: $OWNER"
+          echo "Owner Plus Repo: $OWNER_PLUS_REPOSITORY"
+          echo "Repo: $REPOSITORY"
         
   # This job extracts the team name from the repository name
   # The team name is used to find the project ID for the team
