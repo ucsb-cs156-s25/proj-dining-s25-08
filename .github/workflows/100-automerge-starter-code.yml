@@ -1,4 +1,4 @@
-name: "85-slack-reflection-prompt.yml"
+name: "100-automerge-starter-code.yml"
 
 # This workflow uses the same setup as workflow 82:
 # <https://ucsb-cs156.github.io/topics/github_actions/workflow_82.html>
