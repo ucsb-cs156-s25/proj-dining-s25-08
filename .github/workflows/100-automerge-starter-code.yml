@@ -258,8 +258,8 @@ jobs:
                 {
                   "type": "section",
                   "text": {
-                    "type": "markdown",
-                    "text": "# Automerge Starter Code Job:"
+                    "type": "mrkdwn",
+                    "text": "## Automerge Starter Code Job:"
                   }
                 },
                 {
@@ -268,7 +268,7 @@ jobs:
                 {
                   "type": "section",
                   "text": {
-                    "type": "markdown",
+                    "type": "mrkdwn",
                     "text": "${{ steps.set_message.outputs.message }}"
                   }
                 },
