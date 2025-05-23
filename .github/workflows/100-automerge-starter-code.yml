@@ -23,6 +23,9 @@ name: "100-automerge-starter-code.yml"
 
 on:
   pull_request:
+    
+  workflow_dispatch:  # Allows manual triggering
+
   schedule:
     # During Daylight Saving Time (Mar–Nov), Pacific is UTC-7
     - cron: "0 7 * * *"  # 12 AM PDT
@@ -30,7 +33,7 @@ on:
     # During Standard Time (Nov–Mar), Pacific is UTC-8
     # - cron: "0 8 * * *"  # 12 AM PST
 
-  workflow_dispatch:  # Allows manual triggering
+  
 
 env:
   PAT: ${{ secrets.PAT }}
