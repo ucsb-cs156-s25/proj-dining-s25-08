@@ -2,23 +2,21 @@ import { render, fireEvent, waitFor, screen } from "@testing-library/react";
 import MenuItemTable from "../../../main/components/MenuItem/MenuItemTable";
 import { menuItemFixtures } from "../../../fixtures/menuItemFixtures";
 import AxiosMockAdapter from "axios-mock-adapter";
+import { MemoryRouter } from "react-router-dom";
 import axios from "axios";
 import {
   apiCurrentUserFixtures,
   currentUserFixtures,
 } from "../../../fixtures/currentUserFixtures";
 import { systemInfoFixtures } from "../../../fixtures/systemInfoFixtures";
-import { MemoryRouter } from "react-router-dom";
 
-// Mock useNavigate
+// Single mock for react-router-dom
 const mockNavigate = jest.fn();
-
 jest.mock("react-router-dom", () => {
   const actual = jest.requireActual("react-router-dom");
   return {
     ...actual,
     useNavigate: () => mockNavigate,
-    MemoryRouter: actual.MemoryRouter,
   };
 });
 
@@ -27,11 +25,6 @@ describe("MenuItemTable Tests", () => {
 
   beforeAll(() => {
     axiosMock = new AxiosMockAdapter(axios);
-  });
-
-  afterEach(() => {
-    axiosMock.reset();
-    mockNavigate.mockReset();
   });
 
   beforeEach(() => {
@@ -43,35 +36,37 @@ describe("MenuItemTable Tests", () => {
       .reply(200, systemInfoFixtures.showingNeither);
   });
 
-  test("Headers appear and empty table renders correctly without buttons", async () => {
+  afterEach(() => {
+    axiosMock.reset();
+    mockNavigate.mockReset();
+  });
+
+  test("Headers appear and empty table renders correctly without buttons", () => {
     render(
       <MemoryRouter>
         <MenuItemTable
           menuItems={[]}
           currentUser={currentUserFixtures.notLoggedIn}
         />
-      </MemoryRouter>,
+      </MemoryRouter>
     );
 
-    expect(screen.getByTestId("MenuItemTable-header-name")).toHaveTextContent(
-      "Item Name",
-    );
-    expect(
-      screen.getByTestId("MenuItemTable-header-station"),
-    ).toHaveTextContent("Station");
-    expect(
-      screen.queryByTestId("MenuItemTable-row-cell-0-col-name"),
-    ).not.toBeInTheDocument();
-    expect(
-      screen.queryByTestId("MenuItemTable-row-cell-0-col-station"),
-    ).not.toBeInTheDocument();
-    expect(
-      screen.queryByTestId("MenuItemTable-cell-row-0-col-Review Item-button"),
-    ).not.toBeInTheDocument();
+    expect(screen.getByTestId("MenuItemTable-header-name"))
+      .toHaveTextContent("Item Name");
+    expect(screen.getByTestId("MenuItemTable-header-station"))
+      .toHaveTextContent("Station");
+
+    // no rows, no buttons
+    expect(screen.queryByTestId("MenuItemTable-row-cell-0-col-name"))
+      .not.toBeInTheDocument();
+    expect(screen.queryByTestId("MenuItemTable-row-cell-0-col-station"))
+      .not.toBeInTheDocument();
+    expect(screen.queryByTestId("MenuItemTable-cell-row-0-col-Review Item-button"))
+      .not.toBeInTheDocument();
   });
 
-  test("Renders 5 Menu Items correctly without buttons", async () => {
-    let fiveMenuItems = menuItemFixtures.fiveMenuItems;
+  test("Renders 5 Menu Items correctly without buttons", () => {
+    const fiveMenuItems = menuItemFixtures.fiveMenuItems;
 
     render(
       <MemoryRouter>
@@ -79,49 +74,59 @@ describe("MenuItemTable Tests", () => {
           menuItems={fiveMenuItems}
           currentUser={currentUserFixtures.notLoggedIn}
         />
-      </MemoryRouter>,
+      </MemoryRouter>
     );
 
-    for (let i = 0; i < fiveMenuItems.length; i++) {
+    fiveMenuItems.forEach((item, i) => {
       expect(
-        screen.getByTestId(`MenuItemTable-cell-row-${i}-col-name`),
-      ).toHaveTextContent(fiveMenuItems[i].name);
+        screen.getByTestId(`MenuItemTable-cell-row-${i}-col-name`)
+      ).toHaveTextContent(item.name);
       expect(
-        screen.getByTestId(`MenuItemTable-cell-row-${i}-col-station`),
-      ).toHaveTextContent(fiveMenuItems[i].station);
+        screen.getByTestId(`MenuItemTable-cell-row-${i}-col-station`)
+      ).toHaveTextContent(item.station);
+
       expect(
         screen.queryByTestId(
-          `MenuItemTable-cell-row-${i}-col-Review Item-button`,
-        ),
+          `MenuItemTable-cell-row-${i}-col-Review Item-button`
+        )
       ).not.toBeInTheDocument();
-    }
+    });
   });
 
   test("Buttons work correctly", async () => {
     render(
       <MemoryRouter>
         <MenuItemTable
-          menuItems={[
-            { id: 1, name: "Oatmeal (vgn)", station: "Grill (Cafe)" },
-          ]}
+          menuItems={menuItemFixtures.oneMenuItem}
           currentUser={currentUserFixtures.userOnly}
         />
-      </MemoryRouter>,
+      </MemoryRouter>
     );
 
-    const button = screen.getByTestId(
-      "MenuItemTable-cell-row-0-col-Review Item-button",
+    // 1) Review Item button
+    const reviewBtn = screen.getByTestId(
+      "MenuItemTable-cell-row-0-col-Review Item-button"
     );
-    expect(button).toBeInTheDocument();
-    expect(button).toHaveClass("btn-warning");
+    expect(reviewBtn).toBeInTheDocument();
+    expect(reviewBtn).toHaveClass("btn-warning");
 
-    fireEvent.click(button);
-
-    await waitFor(() => expect(mockNavigate).toHaveBeenCalledTimes(1));
-    await waitFor(() =>
+    fireEvent.click(reviewBtn);
+    await waitFor(() => {
       expect(mockNavigate).toHaveBeenCalledWith(
-        "/myreviews/create?itemId=1&itemName=Oatmeal%20(vgn)",
-      ),
+        "/myreviews/create?itemId=1&itemName=Oatmeal%20(vgn)"
+      );
+    });
+
+    // 2) All Reviews button
+    const allBtn = screen.getByTestId(
+      "MenuItemTable-cell-row-0-col-All Reviews-button"
     );
+    expect(allBtn).toBeInTheDocument();
+    expect(allBtn).toHaveClass("btn-warning");
+
+    fireEvent.click(allBtn);
+    await waitFor(() => {
+      expect(mockNavigate).toHaveBeenCalledWith("/reviews/1");
+    });
   });
 });

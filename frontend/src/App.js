@@ -3,6 +3,12 @@ import HomePage from "main/pages/HomePage";
 import ProfilePage from "main/pages/ProfilePage";
 import AdminUsersPage from "main/pages/AdminUsersPage";
 
+import PlaceholderIndexPage from "main/pages/Placeholder/PlaceholderIndexPage";
+import PlaceholderCreatePage from "main/pages/Placeholder/PlaceholderCreatePage";
+import PlaceholderEditPage from "main/pages/Placeholder/PlaceholderEditPage";
+
+import ReviewsPage from "main/pages/Reviews/ReviewsPage";
+
 import MyReviewsIndexPage from "main/pages/MyReviews/MyReviewsIndexPage";
 import MyReviewsCreatePage from "main/pages/MyReviews/MyReviewsCreatePage";
 
@@ -22,28 +28,67 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
+        {/* Public */}
         <Route exact path="/" element={<HomePage />} />
         <Route exact path="/profile" element={<ProfilePage />} />
 
+        {/* Admin-only */}
         {hasRole(currentUser, "ROLE_ADMIN") && (
           <Route exact path="/admin/users" element={<AdminUsersPage />} />
         )}
 
+        {/* User-only: My Reviews + ReviewsPage */}
         {hasRole(currentUser, "ROLE_USER") && (
           <>
-            <Route exact path="/myreviews" element={<MyReviewsIndexPage />} />
+            <Route
+              exact
+              path="/myreviews"
+              element={<MyReviewsIndexPage />}
+            />
             <Route
               exact
               path="/myreviews/create"
               element={<MyReviewsCreatePage />}
             />
+            <Route
+              exact
+              path="/reviews/:itemid"
+              element={<ReviewsPage />}
+            />
           </>
         )}
 
+        {/* Admin-only moderate */}
         {hasRole(currentUser, "ROLE_ADMIN") && (
           <Route exact path="/moderate" element={<Moderate />} />
         )}
 
+        {/* User-only placeholder */}
+        {hasRole(currentUser, "ROLE_USER") && (
+          <Route
+            exact
+            path="/placeholder"
+            element={<PlaceholderIndexPage />}
+          />
+        )}
+
+        {/* Admin-only placeholder create/edit */}
+        {hasRole(currentUser, "ROLE_ADMIN") && (
+          <>
+            <Route
+              exact
+              path="/placeholder/create"
+              element={<PlaceholderCreatePage />}
+            />
+            <Route
+              exact
+              path="/placeholder/edit/:id"
+              element={<PlaceholderEditPage />}
+            />
+          </>
+        )}
+
+        {/* Dining commons (public) */}
         <Route
           exact
           path="/diningcommons/:date-time/:dining-commons-code"
