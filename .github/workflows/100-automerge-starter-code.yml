@@ -265,10 +265,10 @@ jobs:
                   "type": "section",
                   "text": {
                     "type": "mrkdwn",
-                    "text": "${{ steps.set_message.outputs.message }}"
+                    "text": "$message"
                   }
                 },
               ]
 
     
-
+# ${{ steps.set_message.outputs.message }}
