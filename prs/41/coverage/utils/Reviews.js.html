@@ -3,7 +3,7 @@
 <html lang="en">
 
 <head>
-    <title>Code coverage report for pages/HomePage.js</title>
+    <title>Code coverage report for utils/Reviews.js</title>
     <meta charset="utf-8" />
     <link rel="stylesheet" href="../prettify.css" />
     <link rel="stylesheet" href="../base.css" />
@@ -19,7 +19,7 @@
 <body>
 <div class='wrapper'>
     <div class='pad1'>
-        <h1><a href="../index.html">All files</a> / <a href="index.html">pages</a> HomePage.js</h1>
+        <h1><a href="../index.html">All files</a> / <a href="index.html">utils</a> Reviews.js</h1>
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
@@ -39,7 +39,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">100% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>1/1</span>
+                <span class='fraction'>2/2</span>
             </div>
         
             
@@ -79,52 +79,37 @@
 <a name='L14'></a><a href='#L14'>14</a>
 <a name='L15'></a><a href='#L15'>15</a>
 <a name='L16'></a><a href='#L16'>16</a>
-<a name='L17'></a><a href='#L17'>17</a>
-<a name='L18'></a><a href='#L18'>18</a>
-<a name='L19'></a><a href='#L19'>19</a>
-<a name='L20'></a><a href='#L20'>20</a>
-<a name='L21'></a><a href='#L21'>21</a>
-<a name='L22'></a><a href='#L22'>22</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L17'></a><a href='#L17'>17</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">3x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">3x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import BasicLayout from "main/layouts/BasicLayout/BasicLayout";
-import { useBackend } from "../utils/useBackend";
-import DiningCommonsTable from "../components/DiningCommons/DiningCommonsTable";
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import { toast } from "react-toastify";
 &nbsp;
-export default function HomePage() {
-  const { data } = useBackend(
-    // Stryker disable next-line all : don't test internal caching of React Query
-    [`/api/dining/all`],
-    { method: "GET", url: "/api/dining/all" },
-    [],
-  );
+export function onDeleteSuccess(message) {
+  console.log(message);
+  toast(message);
+}
 &nbsp;
-  const date = new Date().toISOString().split("T")[0];
-&nbsp;
-  return (
-    &lt;BasicLayout&gt;
-      &lt;h1&gt;Dining Commons&lt;/h1&gt;
-      &lt;DiningCommonsTable commons={data} date={date} /&gt;
-    &lt;/BasicLayout&gt;
-  );
+export function cellToAxiosParamsDelete(cell) {
+  return {
+    url: "/api/reviews",
+    method: "DELETE",
+    params: {
+      itemId: cell.row.values.itemId,
+    },
+  };
 }
 &nbsp;</pre></td></tr></table></pre>
 
