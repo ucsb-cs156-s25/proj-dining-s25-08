@@ -137,14 +137,16 @@ jobs:
           echo "Found $cnt new commits in starter/main"
           if [ "$cnt" -eq 0 ]; then
             echo "No changes to merge" >&2
-            echo "merged=false" >> $GITHUB_OUTPUT
+            echo "merge_conflict=false" >> $GITHUB_OUTPUT
           else
             # Attempt non-interactive merge with custom message
             if git merge --no-edit -m "Automated daily merge from starter" starter/main; then
               echo "Merge succeeded" >&2
               echo "merged=true" >> $GITHUB_OUTPUT
+              echo "merge_conflict=false" >> $GITHUB_OUTPUT
             else
               echo "Merge conflict!" >&2
+              echo "merged=false" >> $GITHUB_OUTPUT
               echo "merge_conflict=true" >> $GITHUB_OUTPUT
               exit 1
             fi
