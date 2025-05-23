@@ -990,7 +990,139 @@ public class ReviewControllerTests extends ControllerTestCase {
         verify(reviewRepository, times(1)).findByStatus(eq(ModerationStatus.AWAITING_REVIEW));
         assertEquals(expectedJson,responseJson);
     }
+@WithMockUser(roles = {"USER"})
+@Test
+public void test_getReviewById_success_as_owner() throws Exception {
+    // Arrange: currentUserService returns a non-admin user by default
+    User user = currentUserService.getUser();
 
+    Review review = Review.builder()
+            .id(42L)
+            .reviewer(user)
+            .reviewerComments("Good stuff")
+            .itemsStars(5L)
+            .dateItemServed(LocalDateTime.now())
+            .item(MenuItem.builder().id(1L).build())
+            .build();
 
+    when(reviewRepository.findById(42L)).thenReturn(Optional.of(review));
+
+    // Act & Assert
+    mockMvc.perform(get("/api/reviews/get?id=42"))
+           .andExpect(status().isOk())
+           .andExpect(jsonPath("$.id").value(42))
+           .andExpect(jsonPath("$.reviewerComments").value("Good stuff"));
+}
+
+@WithMockUser(roles = {"USER"})
+@Test
+public void test_getReviewById_forbidden_when_not_owner_or_admin() throws Exception {
+    // Arrange: currentUserService returns user A, but review belongs to user B
+    User userA = currentUserService.getUser();
+    User userB = User.builder().id(userA.getId() + 1).build();
+
+    Review review = Review.builder()
+            .id(42L)
+            .reviewer(userB)
+            .reviewerComments("Private")
+            .itemsStars(4L)
+            .dateItemServed(LocalDateTime.now())
+            .item(MenuItem.builder().id(1L).build())
+            .build();
+
+    when(reviewRepository.findById(42L)).thenReturn(Optional.of(review));
+
+    // Act & Assert
+    mockMvc.perform(get("/api/reviews/get?id=42"))
+           .andExpect(status().isForbidden());
+}
+
+@WithMockUser(roles = {"USER"})
+@Test
+public void test_getReviewById_not_found_when_missing() throws Exception {
+    // Arrange: no review in repository
+    when(reviewRepository.findById(999L)).thenReturn(Optional.empty());
+
+    // Act & Assert
+    mockMvc.perform(get("/api/reviews/get?id=999"))
+           .andExpect(status().isNotFound());
+}
+
+@WithMockUser(roles = {"USER","ADMIN"})
+@Test
+public void test_getReviewById_success_as_admin() throws Exception {
+    // Arrange: mark current user as admin
+    User admin = currentUserService.getUser();
+    admin.setAdmin(true);
+
+    // Review belongs to someone else
+    User other = User.builder().id(admin.getId() + 1).build();
+    Review review = Review.builder()
+            .id(55L)
+            .reviewer(other)
+            .reviewerComments("From other user")
+            .itemsStars(3L)
+            .dateItemServed(LocalDateTime.now())
+            .item(MenuItem.builder().id(1L).build())
+            .build();
+
+    when(reviewRepository.findById(55L)).thenReturn(Optional.of(review));
+
+    // Act & Assert
+    mockMvc.perform(get("/api/reviews/get?id=55"))
+           .andExpect(status().isOk())
+           .andExpect(jsonPath("$.id").value(55))
+           .andExpect(jsonPath("$.reviewerComments").value("From other user"));
+}
+
+@WithMockUser(roles = {"USER"})
+@Test
+public void test_nullReviewerComments_on_creating_new_review() throws Exception {
+    // Arrange
+    LocalDateTime now = LocalDateTime.now();
+
+    User user = currentUserService.getUser();
+    MenuItem menuItem = MenuItem.builder().id(1L).build();
+
+    Review review = Review.builder()
+            .itemsStars(1L)
+            .reviewerComments(null)  // critical branch path
+            .dateItemServed(LocalDateTime.of(2021, 12, 12, 8, 8, 8))
+            .reviewer(user)
+            .status(ModerationStatus.AWAITING_REVIEW)
+            .item(menuItem)
+            .build();
+
+    Review reviewReturn = Review.builder()
+            .dateCreated(now)
+            .dateEdited(now)
+            .itemsStars(1L)
+            .reviewerComments(null)
+            .dateItemServed(LocalDateTime.of(2021, 12, 12, 8, 8, 8))
+            .reviewer(user)
+            .status(ModerationStatus.AWAITING_REVIEW)
+            .item(menuItem)
+            .id(0L)
+            .build();
+
+    when(reviewRepository.save(eq(review))).thenReturn(reviewReturn);
+
+    // Act
+    MvcResult response = mockMvc.perform(
+                    post("/api/reviews/post?itemId=1&itemsStars=1&dateItemServed=2021-12-12T08:08:08") // no reviewerComments param at all
+                            .with(csrf()))
+            .andExpect(status().isOk())
+            .andReturn();
+
+    String jsonReview = mapper.writeValueAsString(reviewReturn);
+
+    // Assert
+    verify(reviewRepository).save(any(Review.class));
+    String responseJson = response.getResponse().getContentAsString();
+
+    assertEquals(jsonReview, responseJson);
+}
+
+    
 
 }
