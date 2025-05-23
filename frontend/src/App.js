@@ -7,6 +7,8 @@ import PlaceholderIndexPage from "main/pages/Placeholder/PlaceholderIndexPage";
 import PlaceholderCreatePage from "main/pages/Placeholder/PlaceholderCreatePage";
 import PlaceholderEditPage from "main/pages/Placeholder/PlaceholderEditPage";
 
+import ReviewsPage from "main/pages/Reviews/ReviewsPage";
+
 import MyReviewsIndexPage from "main/pages/MyReviews/MyReviewsIndexPage";
 import MyReviewsCreatePage from "main/pages/MyReviews/MyReviewsCreatePage";
 
