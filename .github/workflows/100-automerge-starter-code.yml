@@ -221,7 +221,7 @@ jobs:
           echo "ORG_NAME: ${{ env.ORG_NAME }}"
           echo "Slack Channel: ${{ fromJSON(env.TEAM_TO_CHANNEL)[needs.get_team_name.outputs.team] }}"
           echo "Merged: ${{ needs.automerge.outputs.merged }}" 
-          echo "Merge_Conflict: ${{ needs.automerge.outputs.merge_conflict }}
+          echo "Merge_Conflict: ${{ needs.automerge.outputs.merge_conflict }}"
 
 
       - name: Setup conditional strings
