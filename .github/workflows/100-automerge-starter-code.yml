@@ -22,6 +22,7 @@ name: "100-automerge-starter-code.yml"
       # GPG_KEY_ID -> your key id
 
 on:
+  pull_request:
   schedule:
     # During Daylight Saving Time (Mar–Nov), Pacific is UTC-7
     - cron: "0 7 * * *"  # 12 AM PDT
