@@ -1,0 +1,1 @@
+If this file shows up in https://github.com/ucsb-cs156-s25/proj-dining-s25-08 on the scma-Test branch, that means it has been auto merged by the github action!
