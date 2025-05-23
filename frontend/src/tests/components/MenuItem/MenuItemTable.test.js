@@ -9,7 +9,6 @@ import {
   currentUserFixtures,
 } from "../../../fixtures/currentUserFixtures";
 import { systemInfoFixtures } from "../../../fixtures/systemInfoFixtures";
-import { MemoryRouter } from "react-router-dom";
 
 // Mock useNavigate
 const mockNavigate = jest.fn();
