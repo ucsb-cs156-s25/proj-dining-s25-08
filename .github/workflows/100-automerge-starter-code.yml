@@ -256,10 +256,10 @@ jobs:
           slack-blocks: >-
             [
                 {
-                  "type": "section",
+                  "type": "header",
                   "text": {
-                    "type": "mrkdwn",
-                    "text": "## Automerge Starter Code Job:"
+                    "type": "plain_text",
+                    "text": "Automerge Starter Code Job:"
                   }
                 },
                 {
