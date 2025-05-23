@@ -119,6 +119,8 @@ jobs:
     outputs:
         merged: ${{ steps.merge_check.outputs.merged }}
         merge_conflict: ${{ steps.merge_check.outputs.merge_conflict }}
+    env:
+      GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
     permissions:
         contents: write
     steps:
