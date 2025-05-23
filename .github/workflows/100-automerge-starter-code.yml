@@ -3,6 +3,24 @@ name: "100-automerge-starter-code.yml"
 # This workflow uses the same setup as workflow 82:
 # <https://ucsb-cs156.github.io/topics/github_actions/workflow_82.html>
 
+# In order to set up this action to use your own GPG Key, follow these steps:
+
+  # Generate GPG Key:
+    # `gpg --full-generate-key` (RSA and RSA, 4096, *, *, your-email@mail.com, (choose a strong passphrase, this will be a github secret))
+    # `gpg --list-secret-keys --keyid-format=long`
+      # look for the “sec” line, e.g. sec   rsa4096/3AA5C34371567BD2
+      # the part after the slash is your KEYID
+
+  # Export / Upload GPG Public Key
+    # `gpg --armor --export <KEYID> > github-actions-bot.pub.asc` (upload this GPG Public Key your github account)
+    # `gpg --armor --export-secret-keys <KEYID> > github-actions-bot.sec.asc` 
+    # `base64 -w0 github-actions-bot.sec.asc > github-actions-bot.sec.asc.b64`
+    
+    # Repo settings -> secrets and variables -> Actions -> New repository secret:
+      # GPG_PRIVATE_KEY -> contents of github-actions-bot.sec.asc.b64
+      # GPG_PASSPHRASE -> your passphrase
+      # GPG_KEY_ID -> your key id
+
 on:
   schedule:
     # During Daylight Saving Time (Mar–Nov), Pacific is UTC-7
