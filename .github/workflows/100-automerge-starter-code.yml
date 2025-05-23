@@ -4,8 +4,6 @@ name: "100-automerge-starter-code.yml"
 # <https://ucsb-cs156.github.io/topics/github_actions/workflow_82.html>
 
 on:
-  pull_request:
-
   schedule:
     # During Daylight Saving Time (Mar–Nov), Pacific is UTC-7
     - cron: "0 7 * * *"  # 12 AM PDT
@@ -109,6 +107,11 @@ jobs:
         with:
           fetch-depth: 0                # fetch all history to allow merging
           token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set Git user for merge commits
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
 
       - name: Configure starter remote
         run: |
