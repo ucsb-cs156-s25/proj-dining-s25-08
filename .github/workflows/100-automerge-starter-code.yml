@@ -101,6 +101,8 @@ jobs:
     outputs:
         merged: ${{ steps.merge_check.outputs.merged }}
         merge_conflict: ${{ steps.merge_check.outputs.merge_conflict }}
+    permissions:
+        contents: write
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -108,10 +110,30 @@ jobs:
           fetch-depth: 0                # fetch all history to allow merging
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Set Git user for merge commits
+      - name: Import GPG private key
+        env:
+          GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
+          echo "$GPG_PRIVATE_KEY" | base64 --decode > private.asc
+          gpg --batch --import private.asc
+
+      - name: Configure Git to GPG-sign commits
+        env:
+          GPG_KEY_ID:     ${{ secrets.GPG_KEY_ID }}
+          GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+        run: |
+          # helper wrapper so Git can sign non-interactive
+          cat << 'EOF' > gpg-sign.sh
+          #!/bin/bash
+          gpg --batch --pinentry-mode=loopback --passphrase "$GPG_PASSPHRASE" "$@"
+          EOF
+          chmod +x gpg-sign.sh
+
+          git config user.name "giozucca" # FLAG: CHANGE THIS TO YOUR USERNAME
+          git config user.email "80614385+giozucca@users.noreply.github.com" # FLAG: CHANGE THIS TO YOUR EMAIL
+          git config commit.gpgsign true
+          git config user.signingkey $GPG_KEY_ID
+          git config gpg.program "$(pwd)/gpg-sign.sh"
 
       - name: Configure starter remote
         run: |
