@@ -48,21 +48,26 @@ describe("MenuItemTable Tests", () => {
           menuItems={[]}
           currentUser={currentUserFixtures.notLoggedIn}
         />
-      </MemoryRouter>
+      </MemoryRouter>,
     );
 
-    expect(screen.getByTestId("MenuItemTable-header-name"))
-      .toHaveTextContent("Item Name");
-    expect(screen.getByTestId("MenuItemTable-header-station"))
-      .toHaveTextContent("Station");
+    expect(screen.getByTestId("MenuItemTable-header-name")).toHaveTextContent(
+      "Item Name",
+    );
+    expect(
+      screen.getByTestId("MenuItemTable-header-station"),
+    ).toHaveTextContent("Station");
 
     // no rows, no buttons
-    expect(screen.queryByTestId("MenuItemTable-row-cell-0-col-name"))
-      .not.toBeInTheDocument();
-    expect(screen.queryByTestId("MenuItemTable-row-cell-0-col-station"))
-      .not.toBeInTheDocument();
-    expect(screen.queryByTestId("MenuItemTable-cell-row-0-col-Review Item-button"))
-      .not.toBeInTheDocument();
+    expect(
+      screen.queryByTestId("MenuItemTable-row-cell-0-col-name"),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByTestId("MenuItemTable-row-cell-0-col-station"),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByTestId("MenuItemTable-cell-row-0-col-Review Item-button"),
+    ).not.toBeInTheDocument();
   });
 
   test("Renders 5 Menu Items correctly without buttons", () => {
@@ -74,21 +79,21 @@ describe("MenuItemTable Tests", () => {
           menuItems={fiveMenuItems}
           currentUser={currentUserFixtures.notLoggedIn}
         />
-      </MemoryRouter>
+      </MemoryRouter>,
     );
 
     fiveMenuItems.forEach((item, i) => {
       expect(
-        screen.getByTestId(`MenuItemTable-cell-row-${i}-col-name`)
+        screen.getByTestId(`MenuItemTable-cell-row-${i}-col-name`),
       ).toHaveTextContent(item.name);
       expect(
-        screen.getByTestId(`MenuItemTable-cell-row-${i}-col-station`)
+        screen.getByTestId(`MenuItemTable-cell-row-${i}-col-station`),
       ).toHaveTextContent(item.station);
 
       expect(
         screen.queryByTestId(
-          `MenuItemTable-cell-row-${i}-col-Review Item-button`
-        )
+          `MenuItemTable-cell-row-${i}-col-Review Item-button`,
+        ),
       ).not.toBeInTheDocument();
     });
   });
@@ -100,12 +105,12 @@ describe("MenuItemTable Tests", () => {
           menuItems={menuItemFixtures.oneMenuItem}
           currentUser={currentUserFixtures.userOnly}
         />
-      </MemoryRouter>
+      </MemoryRouter>,
     );
 
     // 1) Review Item button
     const reviewBtn = screen.getByTestId(
-      "MenuItemTable-cell-row-0-col-Review Item-button"
+      "MenuItemTable-cell-row-0-col-Review Item-button",
     );
     expect(reviewBtn).toBeInTheDocument();
     expect(reviewBtn).toHaveClass("btn-warning");
@@ -113,13 +118,13 @@ describe("MenuItemTable Tests", () => {
     fireEvent.click(reviewBtn);
     await waitFor(() => {
       expect(mockNavigate).toHaveBeenCalledWith(
-        "/myreviews/create?itemId=1&itemName=Oatmeal%20(vgn)"
+        "/myreviews/create?itemId=1&itemName=Oatmeal%20(vgn)",
       );
     });
 
     // 2) All Reviews button
     const allBtn = screen.getByTestId(
-      "MenuItemTable-cell-row-0-col-All Reviews-button"
+      "MenuItemTable-cell-row-0-col-All Reviews-button",
     );
     expect(allBtn).toBeInTheDocument();
     expect(allBtn).toHaveClass("btn-warning");
