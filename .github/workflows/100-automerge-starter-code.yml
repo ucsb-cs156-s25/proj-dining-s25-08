@@ -1,0 +1,269 @@
+name: "100-automerge-starter-code.yml"
+
+# This workflow uses the same setup as workflow 82:
+# <https://ucsb-cs156.github.io/topics/github_actions/workflow_82.html>
+
+# In order to set up this action to use your own GPG Key, follow these steps:
+
+  # Generate GPG Key:
+    # `gpg --full-generate-key` (RSA and RSA, 4096, *, *, your-email@mail.com, (choose a strong passphrase, this will be a github secret))
+    # `gpg --list-secret-keys --keyid-format=long`
+      # look for the “sec” line, e.g. sec   rsa4096/3AA5C34371567BD2
+      # the part after the slash is your KEYID
+
+  # Export / Upload GPG Public Key
+    # `gpg --armor --export <KEYID> > github-actions-bot.pub.asc` (upload this GPG Public Key your github account)
+    # `gpg --armor --export-secret-keys <KEYID> > github-actions-bot.sec.asc` 
+    # `base64 -w0 github-actions-bot.sec.asc > github-actions-bot.sec.asc.b64`
+    
+    # Repo settings -> secrets and variables -> Actions -> New repository secret:
+      # GPG_PRIVATE_KEY -> contents of github-actions-bot.sec.asc.b64
+      # GPG_PASSPHRASE -> your passphrase
+      # GPG_KEY_ID -> your key id
+
+on:
+  schedule:
+    # During Daylight Saving Time (Mar–Nov), Pacific is UTC-7
+    - cron: "0 7 * * *"  # 12 AM PDT
+
+    # During Standard Time (Nov–Mar), Pacific is UTC-8
+    # - cron: "0 8 * * *"  # 12 AM PST
+
+  workflow_dispatch:  # Allows manual triggering
+
+env:
+  PAT: ${{ secrets.PAT }}
+  TEAM_TO_CHANNEL: ${{vars.TEAM_TO_CHANNEL}}
+  ORG_NAME: ${{ github.repository_owner }}
+  REPO_NAME: ${{ github.event.repository.name }}
+
+  
+
+  # The columns in the Kanban board that we are interested in
+  START_DATE: "2025-05-10"
+  END_DATE: "2025-06-06"  # Set the end date for the workflow
+
+jobs:
+
+  # This job checks if the current date is before the END_DATE
+  check_date:
+    name: Check Date
+    runs-on: ubuntu-latest
+    outputs:
+      continue: ${{ steps.check_date.outputs.continue }}
+    steps:
+      - name: Check if current date is before END_DATE
+        id: check_date
+        run: |
+          current_date=$(date +%Y-%m-%d)
+          end_date="${{ env.END_DATE }}"
+          start_date="${{ env.START_DATE }}"
+          
+          if [[ "$current_date" > "$end_date" ]]; then
+            echo "Current date is after $end_date. Stopping workflow."
+            echo "continue=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "Current date is before $end_date. Continuing workflow."
+            echo "continue=true" >> "$GITHUB_OUTPUT"
+          fi
+          if [[ "$current_date" < "$start_date" ]]; then
+            echo "Current date is before $start_date. Stopping workflow."
+            echo "continue=false" >> "$GITHUB_OUTPUT"
+          fi
+          
+          OWNER=${{ github.repository_owner }}
+          OWNER_PLUS_REPOSITORY=${{github.repository}}
+          REPOSITORY=${OWNER_PLUS_REPOSITORY/$OWNER\//}  
+          if [[ "$OWNER" == "ucsb-cs156" ]]; then
+            echo "This workflow should not run on repos in the ucsb-cs156 organization"
+            echo "continue=false" >> "$GITHUB_OUTPUT"
+          fi
+          if [[ "$REPOSITORY" == STARTER* ]]; then
+            echo "This workflow should not run on STARTER repos"
+            echo "continue=false" >> "$GITHUB_OUTPUT"
+          fi
+          if [[ -f "$GITHUB_OUTPUT" ]]; then
+            echo "Contents of $GITHUB_OUTPUT:"
+            cat "$GITHUB_OUTPUT"
+          fi
+        
+  # This job extracts the team name from the repository name
+  # The team name is used to find the project ID for the team
+  # It does this by extracting the last 6 characters of the repository name
+  # Then sets the team name as an output for the next job
+  get_team_name:
+    name: Get Team Name and Repository Name
+    runs-on: ubuntu-latest
+    needs: check_date
+    if: needs.check_date.outputs.continue == 'true'
+    outputs:
+      team: ${{ steps.find_team.outputs.team }}
+      repository: ${{ steps.find_team.outputs.repository }}
+    steps:
+      - name: Extract Team Name from Repo
+        id: find_team
+        run: |
+          REPO=${{ github.repository }}
+          TEAM_NAME="${REPO: -6}"
+
+          OWNER_PLUS_REPOSITORY=${{github.repository}}
+          OWNER=${{ github.repository_owner }}
+          REPOSITORY=${OWNER_PLUS_REPOSITORY/$OWNER\//}  
+
+          echo "repository=${REPOSITORY}" >> "$GITHUB_OUTPUT"
+          echo "team=${TEAM_NAME}" >> "$GITHUB_OUTPUT"
+
+  
+  automerge:
+    runs-on: ubuntu-latest
+    needs: [get_team_name, check_date]
+    if: needs.check_date.outputs.continue == 'true'
+    outputs:
+        merged: ${{ steps.merge_check.outputs.merged }}
+        merge_conflict: ${{ steps.merge_check.outputs.merge_conflict }}
+        no_changes: ${{ steps.merge_check.outputs.no_changes }}
+    env:
+      GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+    permissions:
+        contents: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0                # fetch all history to allow merging
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Import GPG private key
+        env:
+          GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
+        run: |
+          echo "$GPG_PRIVATE_KEY" | base64 --decode > private.asc
+          gpg --batch --import private.asc
+
+      - name: Configure Git to GPG-sign commits
+        env:
+          GPG_KEY_ID:     ${{ secrets.GPG_KEY_ID }}
+          GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+        run: |
+          # helper wrapper so Git can sign non-interactive
+          cat << 'EOF' > gpg-sign.sh
+          #!/bin/bash
+          gpg --batch --pinentry-mode=loopback --passphrase "$GPG_PASSPHRASE" "$@"
+          EOF
+          chmod +x gpg-sign.sh
+
+          git config user.name "giozucca" # FLAG: CHANGE THIS TO YOUR USERNAME
+          git config user.email "80614385+giozucca@users.noreply.github.com" # FLAG: CHANGE THIS TO YOUR EMAIL
+          git config commit.gpgsign true
+          git config user.signingkey $GPG_KEY_ID
+          git config gpg.program "$(pwd)/gpg-sign.sh"
+
+      - name: Configure starter remote
+        run: |
+          git remote remove starter || true
+          git remote add starter https://github.com/ucsb-cs156/proj-dining.git # TODO: replace url with var?
+
+      - name: Fetch both remotes
+        run: |
+          git fetch origin
+          git fetch starter
+
+      - name: Checkout main branch
+        run: git checkout main
+
+      - name: Ensure main is up-to-date
+        run: git pull --ff-only origin main
+
+      - name: Detect and merge starter changes
+        id: merge_check
+        run: |
+          # Count commits in starter/main not in main
+          cnt=$(git rev-list HEAD..starter/main --count)
+          echo "Found $cnt new commits in starter/main"
+          if [ "$cnt" -eq 0 ]; then
+            echo "No changes to merge" >&2
+            echo "merged=false" >> $GITHUB_OUTPUT
+            echo "merge_conflict=false" >> $GITHUB_OUTPUT
+            echo "no_changes=true" >> $GITHUB_OUTPUT
+          else
+            # Attempt non-interactive merge with custom message
+            if git merge --no-edit -m "AUTOMERGE ACTION: Automated daily merge from starter" starter/main; then
+              echo "Merge succeeded" >&2
+              echo "merged=true" >> $GITHUB_OUTPUT
+              echo "merge_conflict=false" >> $GITHUB_OUTPUT
+              echo "no_changes=false" >> $GITHUB_OUTPUT
+            else
+              echo "Merge conflict!" >&2
+              echo "merged=false" >> $GITHUB_OUTPUT
+              echo "merge_conflict=true" >> $GITHUB_OUTPUT
+              echo "no_changes=false" >> $GITHUB_OUTPUT
+            fi
+          fi
+
+      - name: Push merged changes
+        if: steps.merge_check.outputs.merged == 'true'
+        run: git push origin main
+
+          
+
+  send-to-slack:
+    name: Send Report to Slack
+    runs-on: ubuntu-latest
+    needs: [get_team_name, check_date, automerge]
+    if: needs.check_date.outputs.continue == 'true'
+    steps:
+      #This step is used to debug the environment variables and Slack text
+      - name: Debug Environment Variables
+        run: |
+          echo "TEAM_TO_CHANNEL: ${{ env.TEAM_TO_CHANNEL }}"
+          echo "ORG_NAME: ${{ env.ORG_NAME }}"
+          echo "Slack Channel: ${{ fromJSON(env.TEAM_TO_CHANNEL)[needs.get_team_name.outputs.team] }}"
+          echo "Merged: ${{ needs.automerge.outputs.merged }}" 
+          echo "Merge_Conflict: ${{ needs.automerge.outputs.merge_conflict }}"
+          echo "No Changes: ${{ needs.automerge.outputs.no_changes }}"
+   
+      - name: Setup conditional strings
+        id: set_message
+        run: |
+          if [[ "$MERGED" = "true" && "$MERGE_CONFLICT" = "false" ]]; then
+            echo "message=✅ Merge successful! ✅" >> $GITHUB_OUTPUT
+          elif [[ "$MERGED" = "false" && "$MERGE_CONFLICT" = "true" ]]; then
+            echo "message=⚠️ Merge conflict detected. ⚠️" >> $GITHUB_OUTPUT
+          elif [[ "$NO_CHANGES" ]]; then
+            echo "message=No changes have been found in the starter repo" >> $GITHUB_OUTPUT
+          else
+            echo "message=Unexpected error when attempting to merge from starter; Please check the logs for this action." >> $GITHUB_OUTPUT  
+          fi
+        env:
+          MERGED: ${{ needs.automerge.outputs.merged }}
+          MERGE_CONFLICT: ${{ needs.automerge.outputs.merge_conflict }}
+
+
+
+      #This step sends the report to the Slack channel associated with the team
+      - name: Send Report to Slack
+        uses: archive/github-actions-slack@v2.10.1
+        with:
+          slack-bot-user-oauth-access-token: ${{ secrets.SLACK_BOT_USER_OAUTH_ACCESS_TOKEN }}
+          slack-channel: ${{ fromJSON(env.TEAM_TO_CHANNEL)[needs.get_team_name.outputs.team] }}
+          slack-optional-icon_emoji: ":fire:"
+          slack-blocks: >-
+            [
+                {
+                  "type": "header",
+                  "text": {
+                    "type": "plain_text",
+                    "text": "Automerge Starter Code Job:"
+                  }
+                },
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "${{ steps.set_message.outputs.message }}"
+                  }
+                },
+              ]
+
+    
+
