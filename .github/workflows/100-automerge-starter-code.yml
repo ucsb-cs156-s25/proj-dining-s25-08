@@ -116,6 +116,8 @@ jobs:
   
   automerge:
     runs-on: ubuntu-latest
+    needs: [get_team_name, check_date]
+    if: needs.check_date.outputs.continue == 'true'
     outputs:
         merged: ${{ steps.merge_check.outputs.merged }}
         merge_conflict: ${{ steps.merge_check.outputs.merge_conflict }}
@@ -179,6 +181,7 @@ jobs:
           echo "Found $cnt new commits in starter/main"
           if [ "$cnt" -eq 0 ]; then
             echo "No changes to merge" >&2
+            echo "merged=false" >> $GITHUB_OUTPUT
             echo "merge_conflict=false" >> $GITHUB_OUTPUT
           else
             # Attempt non-interactive merge with custom message
