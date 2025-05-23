@@ -3,9 +3,25 @@ name: "100-automerge-starter-code.yml"
 # This workflow uses the same setup as workflow 82:
 # <https://ucsb-cs156.github.io/topics/github_actions/workflow_82.html>
 
-on:
-  pull_request:
+# In order to set up this action to use your own GPG Key, follow these steps:
 
+  # Generate GPG Key:
+    # `gpg --full-generate-key` (RSA and RSA, 4096, *, *, your-email@mail.com, (choose a strong passphrase, this will be a github secret))
+    # `gpg --list-secret-keys --keyid-format=long`
+      # look for the “sec” line, e.g. sec   rsa4096/3AA5C34371567BD2
+      # the part after the slash is your KEYID
+
+  # Export / Upload GPG Public Key
+    # `gpg --armor --export <KEYID> > github-actions-bot.pub.asc` (upload this GPG Public Key your github account)
+    # `gpg --armor --export-secret-keys <KEYID> > github-actions-bot.sec.asc` 
+    # `base64 -w0 github-actions-bot.sec.asc > github-actions-bot.sec.asc.b64`
+    
+    # Repo settings -> secrets and variables -> Actions -> New repository secret:
+      # GPG_PRIVATE_KEY -> contents of github-actions-bot.sec.asc.b64
+      # GPG_PASSPHRASE -> your passphrase
+      # GPG_KEY_ID -> your key id
+
+on:
   schedule:
     # During Daylight Saving Time (Mar–Nov), Pacific is UTC-7
     - cron: "0 7 * * *"  # 12 AM PDT
@@ -100,11 +116,11 @@ jobs:
   
   automerge:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
     outputs:
         merged: ${{ steps.merge_check.outputs.merged }}
         merge_conflict: ${{ steps.merge_check.outputs.merge_conflict }}
+    permissions:
+        contents: write
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -112,10 +128,30 @@ jobs:
           fetch-depth: 0                # fetch all history to allow merging
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Set Git user for merge commits
+      - name: Import GPG private key
+        env:
+          GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
+          echo "$GPG_PRIVATE_KEY" | base64 --decode > private.asc
+          gpg --batch --import private.asc
+
+      - name: Configure Git to GPG-sign commits
+        env:
+          GPG_KEY_ID:     ${{ secrets.GPG_KEY_ID }}
+          GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+        run: |
+          # helper wrapper so Git can sign non-interactive
+          cat << 'EOF' > gpg-sign.sh
+          #!/bin/bash
+          gpg --batch --pinentry-mode=loopback --passphrase "$GPG_PASSPHRASE" "$@"
+          EOF
+          chmod +x gpg-sign.sh
+
+          git config user.name "giozucca" # FLAG: CHANGE THIS TO YOUR USERNAME
+          git config user.email "80614385+giozucca@users.noreply.github.com" # FLAG: CHANGE THIS TO YOUR EMAIL
+          git config commit.gpgsign true
+          git config user.signingkey $GPG_KEY_ID
+          git config gpg.program "$(pwd)/gpg-sign.sh"
 
       - name: Configure starter remote
         run: |
@@ -141,7 +177,6 @@ jobs:
           echo "Found $cnt new commits in starter/main"
           if [ "$cnt" -eq 0 ]; then
             echo "No changes to merge" >&2
-            echo "merged=false" >> $GITHUB_OUTPUT
             echo "merge_conflict=false" >> $GITHUB_OUTPUT
           else
             # Attempt non-interactive merge with custom message
