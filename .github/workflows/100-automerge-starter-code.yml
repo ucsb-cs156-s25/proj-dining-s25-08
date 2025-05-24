@@ -31,6 +31,8 @@ on:
     # During Standard Time (Nov–Mar), Pacific is UTC-8
     # - cron: "0 8 * * *"  # 12 AM PST
 
+  pull_request:
+
   workflow_dispatch:  # Allows manual triggering
 
 env:
