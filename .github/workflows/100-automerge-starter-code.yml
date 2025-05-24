@@ -132,7 +132,7 @@ jobs:
           REPO_TRUNCATED=$(printf '%s\n' "$REPO_FULL" | cut -d- -f1-2)
           echo "$REPO_TRUNCATED"
 
-          echo "starter_repo_url=https://github.com/ucsb-cs156/$REPO_TRUNCATED"#  >> $GITHUB_OUTPUT
+          echo "starter_repo_url=https://github.com/ucsb-cs156/${REPO_TRUNCATED}" #  >> $GITHUB_OUTPUT
 
           exit 1
           if [[ "${{ needs.get_team_name.outputs.repository }}" = "true"]]; then
