@@ -24,7 +24,7 @@ name: "100-automerge-starter-code.yml"
 on:
   schedule:
     # if you change this, be sure to add START_DATE and END_DATE
-    - cron: '0 10 * 5-6 *' # 3am UTC, May-June PLEASE ADJUST MONTHS IF NEEDED
+    - cron: '0 10 * 5-6 *' # 3am PST, May-June PLEASE ADJUST MONTHS IF NEEDED
 
   workflow_dispatch:  # Allows manual triggering
 
