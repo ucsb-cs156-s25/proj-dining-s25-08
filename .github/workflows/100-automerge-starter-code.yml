@@ -24,10 +24,15 @@ name: "100-automerge-starter-code.yml"
 on:
   schedule:
     # During Daylight Saving Time (Mar–Nov), Pacific is UTC-7
-    - cron: "0 7 * * *"  # 12 AM PDT
+    # if you change this, be sure to add START_DATE and END_DATE
+    # - cron: 0 7 * 5-6 * # 7am UTC, May-June PLEASE ADJUST MONTHS 
+    # - cron: "0 7 * * *"  # 12 AM PDT
+    - cron: 13 * * * * # at minute 15
 
     # During Standard Time (Nov–Mar), Pacific is UTC-8
     # - cron: "0 8 * * *"  # 12 AM PST
+
+  pull_request:
 
   workflow_dispatch:  # Allows manual triggering
 
@@ -37,9 +42,12 @@ env:
   ORG_NAME: ${{ github.repository_owner }}
   REPO_NAME: ${{ github.event.repository.name }}
 
-  
+  # Use the username / email associated with your PGP Key
+  GITHUB_USERNAME: "giozucca"
+  GITHUB_EMAIL: "80614385+giozucca@users.noreply.github.com"
 
   # The columns in the Kanban board that we are interested in
+  # IF YOU CHANGE THIS, BE SURE TO CHANGE THE CRON RANGE AS WELL
   START_DATE: "2025-05-10"
   END_DATE: "2025-06-06"  # Set the end date for the workflow
 
@@ -128,26 +136,10 @@ jobs:
           # This code truncates everything after the first two words combined with a -
           # For example proj-dining-s25-08 becomes proj-dining
           REPO_FULL=${{ needs.get_team_name.outputs.repository }}
-          REPO_FULL="proj-dining-s25-08-TEST-FORK"
           REPO_TRUNCATED=$(printf '%s\n' "$REPO_FULL" | cut -d- -f1-2)
           echo "$REPO_TRUNCATED"
 
-          echo "starter_repo_url=https://github.com/ucsb-cs156/${REPO_TRUNCATED}" #  >> $GITHUB_OUTPUT
-
-          exit 1
-          if [[ "${{ needs.get_team_name.outputs.repository }}" = "true"]]; then
-            echo "message=✅ Merge successful! ✅" >> $GITHUB_OUTPUT
-          elif [[ "$MERGED" = "false" ]]; then
-            echo "message=⚠️ Merge conflict detected. ⚠️" >> $GITHUB_OUTPUT
-          elif [[ "$MERGED" = "false" ]]; then
-            echo "message=⚠️ Merge conflict detected. ⚠️" >> $GITHUB_OUTPUT
-          elif [[ "$MERGED" = "false" ]]; then
-            echo "message=⚠️ Merge conflict detected. ⚠️" >> $GITHUB_OUTPUT
-          fi
-
-          echo "${{ needs.get_team_name.outputs.team }}"
-
-          echo "starter_repo_url=${REPOSITORY}" >> "$GITHUB_OUTPUT"
+          echo "starter_repo_url=https://github.com/ucsb-cs156/${REPO_TRUNCATED}" >> $GITHUB_OUTPUT
 
   
   automerge:
@@ -188,8 +180,8 @@ jobs:
           EOF
           chmod +x gpg-sign.sh
 
-          git config user.name "giozucca" # FLAG: CHANGE THIS TO YOUR USERNAME
-          git config user.email "80614385+giozucca@users.noreply.github.com" # FLAG: CHANGE THIS TO YOUR EMAIL
+          git config user.name "${{ env.GITHUB_USERNAME }}" # FLAG: CHANGE THIS TO YOUR USERNAME
+          git config user.email "${{ env.GITHUB_EMAIL }}" # FLAG: CHANGE THIS TO YOUR EMAIL
           git config commit.gpgsign true
           git config user.signingkey $GPG_KEY_ID
           git config gpg.program "$(pwd)/gpg-sign.sh"
@@ -197,23 +189,23 @@ jobs:
       - name: Configure starter remote
         run: |
           git remote remove starter || true
-          git remote add starter https://github.com/ucsb-cs156/proj-dining.git # TODO: replace url with var?
+          git remote add starter ${{ needs.get_starter_repo.outputs.starter_repo_url }}.git
 
       - name: Fetch both remotes
         run: |
           git fetch origin
           git fetch starter
 
-      - name: Checkout main branch
-        run: git checkout main
+      - name: Checkout scma-Test branch
+        run: git checkout scma-Test
 
-      - name: Ensure main is up-to-date
-        run: git pull --ff-only origin main
+      - name: Ensure scma-Test is up-to-date
+        run: git pull --ff-only origin scma-Test
 
       - name: Detect and merge starter changes
         id: merge_check
         run: |
-          # Count commits in starter/main not in main
+          # Count commits in starter/main not in scma-Test
           cnt=$(git rev-list HEAD..starter/main --count)
           echo "Found $cnt new commits in starter/main"
           if [ "$cnt" -eq 0 ]; then
@@ -238,7 +230,7 @@ jobs:
 
       - name: Push merged changes
         if: steps.merge_check.outputs.merged == 'true'
-        run: git push origin main
+        run: git push origin scma-Test
 
           
 
@@ -265,7 +257,7 @@ jobs:
             echo "message=✅ Merge successful! ✅" >> $GITHUB_OUTPUT
           elif [[ "$MERGED" = "false" && "$MERGE_CONFLICT" = "true" ]]; then
             echo "message=⚠️ Merge conflict detected. ⚠️" >> $GITHUB_OUTPUT
-          elif [[ "$NO_CHANGES" ]]; then
+          elif [[ "$NO_CHANGES" = "true" ]]; then
             echo "message=No changes have been found in the starter repo" >> $GITHUB_OUTPUT
           else
             echo "message=Unexpected error when attempting to merge from starter; Please check the logs for this action." >> $GITHUB_OUTPUT  
@@ -273,6 +265,7 @@ jobs:
         env:
           MERGED: ${{ needs.automerge.outputs.merged }}
           MERGE_CONFLICT: ${{ needs.automerge.outputs.merge_conflict }}
+          NO_CHANGES: ${{ needs.automerge.outputs.no_changes }}
 
 
 
