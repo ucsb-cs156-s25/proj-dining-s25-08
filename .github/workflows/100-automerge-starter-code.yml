@@ -126,7 +126,10 @@ jobs:
         id: get_legacy_code_URL
         run: |
           REPO_FULL=${{ needs.get_team_name.outputs.repository }}
-          REPO_TRUNCATED=${REPO_FULL%%-*-*}
+          REPO_FULL="proj-dining-s25-08-TEST-FORK"
+          REPO_TRUNCATED=$(printf '%s\n' "$REPO_FULL" | cut -d- -f1-2)
+          echo "$REPO_TRUNCATED"   # → proj-dining
+
           echo "$REPO_FULL"
           echo "$REPO_TRUNCATED"
           exit 1
