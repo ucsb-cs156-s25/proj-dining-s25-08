@@ -86,11 +86,6 @@ jobs:
             echo "Contents of $GITHUB_OUTPUT:"
             cat "$GITHUB_OUTPUT"
           fi
-
-          echo "Owner is: $OWNER"
-          echo "Owner Plus Repo: $OWNER_PLUS_REPOSITORY"
-          echo "Repo: $REPOSITORY"
-          
         
   # This job extracts the team name from the repository name
   # The team name is used to find the project ID for the team
@@ -116,17 +111,43 @@ jobs:
           REPOSITORY=${OWNER_PLUS_REPOSITORY/$OWNER\//}  
 
           echo "repository=${REPOSITORY}" >> "$GITHUB_OUTPUT"
-          echo "repository=${REPOSITORY}"
           echo "team=${TEAM_NAME}" >> "$GITHUB_OUTPUT"
 
-          exit 1
+  get_starter_repo:
+    name: Get Legacy Code URL
+    runs-on: ubuntu-latest
+    needs: [get_team_name, check_date]
+    if: needs.check_date.outputs.continue == 'true'
+    outputs:
+      starter_repo_url: ${{ steps.get_legacy_code_URL.outputs.starter_repo_url }}
 
-          
+    steps:
+      - name: Get Legacy Code URL
+        id: get_legacy_code_URL
+        run: |
+          REPO_FULL=${{ needs.get_team_name.outputs.repository }}
+          REPO_TRUNCATED=${REPO_FULL%%-*-*}
+          echo "$REPO_FULL"
+          echo "$REPO_TRUNCATED"
+          exit 1
+          if [[ "${{ needs.get_team_name.outputs.repository }}" = "true"]]; then
+            echo "message=✅ Merge successful! ✅" >> $GITHUB_OUTPUT
+          elif [[ "$MERGED" = "false" ]]; then
+            echo "message=⚠️ Merge conflict detected. ⚠️" >> $GITHUB_OUTPUT
+          elif [[ "$MERGED" = "false" ]]; then
+            echo "message=⚠️ Merge conflict detected. ⚠️" >> $GITHUB_OUTPUT
+          elif [[ "$MERGED" = "false" ]]; then
+            echo "message=⚠️ Merge conflict detected. ⚠️" >> $GITHUB_OUTPUT
+          fi
+
+          echo "${{ needs.get_team_name.outputs.team }}"
+
+          echo "starter_repo_url=${REPOSITORY}" >> "$GITHUB_OUTPUT"
 
   
   automerge:
     runs-on: ubuntu-latest
-    needs: [get_team_name, check_date]
+    needs: [get_team_name, check_date, get_starter_repo]
     if: needs.check_date.outputs.continue == 'true'
     outputs:
         merged: ${{ steps.merge_check.outputs.merged }}
