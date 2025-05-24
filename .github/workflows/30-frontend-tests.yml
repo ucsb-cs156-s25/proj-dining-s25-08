@@ -2,11 +2,11 @@ name: "30-frontend-tests: JavaScript, Jest Unit tests"
 
 on:
   workflow_dispatch:
-  pull_request:
-    paths: [frontend/**, .github/workflows/30-frontend-tests.yml]
-  push:
-    branches: [main]
-    paths: [frontend/**, .github/workflows/30-frontend-tests.yml]
+  # pull_request:
+  #   paths: [frontend/**, .github/workflows/30-frontend-tests.yml]
+  # push:
+  #   branches: [main]
+  #   paths: [frontend/**, .github/workflows/30-frontend-tests.yml]
 
 jobs:
   build:

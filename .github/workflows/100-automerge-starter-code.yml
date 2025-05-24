@@ -24,7 +24,10 @@ name: "100-automerge-starter-code.yml"
 on:
   schedule:
     # if you change this, be sure to add START_DATE and END_DATE
+
     - cron: '0 10 * 5-6 *' # 3am PST, May-June PLEASE ADJUST MONTHS IF NEEDED
+
+  pull_request:
 
   workflow_dispatch:  # Allows manual triggering
 
@@ -172,8 +175,8 @@ jobs:
           EOF
           chmod +x gpg-sign.sh
 
-          git config user.name "${{ env.GITHUB_USERNAME }}" # FLAG: CHANGE THIS TO YOUR USERNAME
-          git config user.email "${{ env.GITHUB_EMAIL }}" # FLAG: CHANGE THIS TO YOUR EMAIL
+          git config user.name "${{ env.GITHUB_USERNAME }}"
+          git config user.email "${{ env.GITHUB_EMAIL }}"
           git config commit.gpgsign true
           git config user.signingkey $GPG_KEY_ID
           git config gpg.program "$(pwd)/gpg-sign.sh"
@@ -181,23 +184,23 @@ jobs:
       - name: Configure starter remote
         run: |
           git remote remove starter || true
-          git remote add starter ${{ needs.get_starter_repo.outputs.starter_repo_url }}.git
+          git remote add starter https://github.com/giozucca/proj-dining-s25-08-TEST-FORK.git
 
       - name: Fetch both remotes
         run: |
           git fetch origin
           git fetch starter
 
-      - name: Checkout main branch
-        run: git checkout main
+      - name: Checkout scma-Test branch
+        run: git checkout scma-Test
 
-      - name: Ensure main is up-to-date
-        run: git pull --ff-only origin main
+      - name: Ensure scma-Test is up-to-date
+        run: git pull --ff-only origin scma-Test
 
       - name: Detect and merge starter changes
         id: merge_check
         run: |
-          # Count commits in starter/main not in main
+          # Count commits in starter/main not in scma-Test
           cnt=$(git rev-list HEAD..starter/main --count)
           echo "Found $cnt new commits in starter/main"
           if [ "$cnt" -eq 0 ]; then
@@ -222,7 +225,7 @@ jobs:
 
       - name: Push merged changes
         if: steps.merge_check.outputs.merged == 'true'
-        run: git push origin main
+        run: git push origin scma-Test
 
           
 
@@ -285,6 +288,3 @@ jobs:
                   }
                 },
               ]
-
-    
-
