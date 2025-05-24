@@ -256,7 +256,7 @@ jobs:
             echo "message=✅ Merge successful! ✅" >> $GITHUB_OUTPUT
           elif [[ "$MERGED" = "false" && "$MERGE_CONFLICT" = "true" ]]; then
             echo "message=⚠️ Merge conflict detected. ⚠️" >> $GITHUB_OUTPUT
-          elif [[ "$NO_CHANGES" ]]; then
+          elif [[ "$NO_CHANGES" = "true" ]]; then
             echo "message=No changes have been found in the starter repo" >> $GITHUB_OUTPUT
           else
             echo "message=Unexpected error when attempting to merge from starter; Please check the logs for this action." >> $GITHUB_OUTPUT  
