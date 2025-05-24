@@ -1,4 +1,4 @@
-omg it's a merge conflict!!
+# proj-dining
 
 UCSB Dining Hall Menus and Reviews
 
