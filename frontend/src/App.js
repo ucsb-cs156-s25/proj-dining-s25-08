@@ -10,6 +10,8 @@ import PlaceholderEditPage from "main/pages/Placeholder/PlaceholderEditPage";
 import ReviewsPage from "main/pages/Reviews/ReviewsPage";
 
 import MyReviewsIndexPage from "main/pages/MyReviews/MyReviewsIndexPage";
+import PostReviewPage from "main/pages/Reviews/PostReviewPage";
+import EditReviewPage from "main/pages/Reviews/EditReviewPage";
 
 import MealTimesPage from "main/pages/Meal/MealTimesPage";
 
@@ -36,6 +38,16 @@ function App() {
           <>
             <Route exact path="/myreviews" element={<MyReviewsIndexPage />} />
             <Route exact path="/reviews/:itemid" element={<ReviewsPage />} />
+            <Route
+              exact
+              path="/reviews/post/:id"
+              element={<PostReviewPage />}
+            />
+            <Route
+              exact
+              path="/reviews/edit/:id"
+              element={<EditReviewPage />}
+            />
           </>
         )}
         {(hasRole(currentUser, "ROLE_ADMIN") ||
