@@ -23,15 +23,9 @@ name: "100-automerge-starter-code.yml"
 
 on:
   schedule:
-    - cron: '15 * * * *' # at minute 15
-    # During Daylight Saving Time (Mar–Nov), Pacific is UTC-7
     # if you change this, be sure to add START_DATE and END_DATE
-    # - cron: 0 7 * 5-6 * # 7am UTC, May-June PLEASE ADJUST MONTHS 
-    # - cron: "0 7 * * *"  # 12 AM PDT
-    
 
-    # During Standard Time (Nov–Mar), Pacific is UTC-8
-    # - cron: "0 8 * * *"  # 12 AM PST
+    - cron: '0 10 * 5-6 *' # 3am PST, May-June PLEASE ADJUST MONTHS IF NEEDED
 
   pull_request:
 
@@ -181,8 +175,8 @@ jobs:
           EOF
           chmod +x gpg-sign.sh
 
-          git config user.name "${{ env.GITHUB_USERNAME }}" # FLAG: CHANGE THIS TO YOUR USERNAME
-          git config user.email "${{ env.GITHUB_EMAIL }}" # FLAG: CHANGE THIS TO YOUR EMAIL
+          git config user.name "${{ env.GITHUB_USERNAME }}"
+          git config user.email "${{ env.GITHUB_EMAIL }}"
           git config commit.gpgsign true
           git config user.signingkey $GPG_KEY_ID
           git config gpg.program "$(pwd)/gpg-sign.sh"
@@ -190,7 +184,7 @@ jobs:
       - name: Configure starter remote
         run: |
           git remote remove starter || true
-          git remote add starter ${{ needs.get_starter_repo.outputs.starter_repo_url }}.git
+          git remote add starter https://github.com/giozucca/proj-dining-s25-08-TEST-FORK.git
 
       - name: Fetch both remotes
         run: |
@@ -294,6 +288,3 @@ jobs:
                   }
                 },
               ]
-
-    
-
