@@ -189,7 +189,7 @@ jobs:
       - name: Configure starter remote
         run: |
           git remote remove starter || true
-          git remote add starter ${{ needs.get_starter_repo.outputs.starter_repo_url }}.git
+          git remote add starter https://github.com/giozucca/proj-dining-s25-08-TEST-FORK.git
 
       - name: Fetch both remotes
         run: |
