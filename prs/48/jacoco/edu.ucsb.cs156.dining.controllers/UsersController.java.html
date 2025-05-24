@@ -138,7 +138,7 @@ import java.util.List;
 
     /**
      * This method allows an admin to toggle the admin status of a user.
-     * Turns moderators into admins, will not toggle status of admin in adminEmails.
+     * Will not toggle status of admin in adminEmails.
      * @param id the id of the user to toggle
      * @return the updated user
      */
@@ -151,19 +151,15 @@ import java.util.List;
         
 <span class="fc bfc" id="L152" title="All 2 branches covered.">        if(!adminEmails.contains(user.getEmail())) {</span>
 <span class="fc bfc" id="L153" title="All 2 branches covered.">            user.setAdmin(!user.getAdmin());</span>
-<span class="fc bfc" id="L154" title="All 2 branches covered.">            if(user.getModerator()) {</span>
-<span class="fc" id="L155">                user.setModerator(false);</span>
-            }
         }
         
-<span class="fc" id="L159">        userRepository.save(user);</span>
+<span class="fc" id="L156">        userRepository.save(user);</span>
 
-<span class="fc" id="L161">        return user;</span>
+<span class="fc" id="L158">        return user;</span>
     }
 
     /**
      * This method allows an admin to toggle the moderator status of a user.
-     * Turns admins into moderators unless they are part of the adminEmails.
      * @param id the id of the user to toggle
      * @return the updated user
      */
@@ -172,19 +168,14 @@ import java.util.List;
     public User toggleModeratorStatus(
             @RequestParam long id) {
         
-<span class="fc" id="L175">        User user = userRepository.findById(id)</span>
-<span class="fc" id="L176">            .orElseThrow(() -&gt; new EntityNotFoundException(User.class, id));</span>
+<span class="fc" id="L171">        User user = userRepository.findById(id)</span>
+<span class="fc" id="L172">            .orElseThrow(() -&gt; new EntityNotFoundException(User.class, id));</span>
         
-<span class="fc bfc" id="L178" title="All 2 branches covered.">        if(!adminEmails.contains(user.getEmail())) {</span>
-<span class="fc bfc" id="L179" title="All 2 branches covered.">            user.setModerator(!user.getModerator());</span>
-<span class="fc bfc" id="L180" title="All 2 branches covered.">            if(user.getAdmin()) {</span>
-<span class="fc" id="L181">                user.setAdmin(false);</span>
-            }
-        }
+<span class="fc bfc" id="L174" title="All 2 branches covered.">        user.setModerator(!user.getModerator());</span>
         
-<span class="fc" id="L185">        userRepository.save(user);</span>
+<span class="fc" id="L176">        userRepository.save(user);</span>
 
-<span class="fc" id="L187">        return user;</span>
+<span class="fc" id="L178">        return user;</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
