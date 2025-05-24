@@ -90,6 +90,7 @@ jobs:
           echo "Owner is: $OWNER"
           echo "Owner Plus Repo: $OWNER_PLUS_REPOSITORY"
           echo "Repo: $REPOSITORY"
+          
         
   # This job extracts the team name from the repository name
   # The team name is used to find the project ID for the team
@@ -115,7 +116,12 @@ jobs:
           REPOSITORY=${OWNER_PLUS_REPOSITORY/$OWNER\//}  
 
           echo "repository=${REPOSITORY}" >> "$GITHUB_OUTPUT"
+          echo "repository=${REPOSITORY}"
           echo "team=${TEAM_NAME}" >> "$GITHUB_OUTPUT"
+
+          exit 1
+
+          
 
   
   automerge:
