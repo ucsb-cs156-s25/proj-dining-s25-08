@@ -22,18 +22,16 @@ name: "100-automerge-starter-code.yml"
       # GPG_KEY_ID -> your key id
 
 on:
-  pull_request:
-    
-  workflow_dispatch:  # Allows manual triggering
-
   schedule:
     # During Daylight Saving Time (Mar–Nov), Pacific is UTC-7
-    - cron: "0 7 * * *"  # 12 AM PDT
+    # if you change this, be sure to add START_DATE and END_DATE
+    - cron: 0 7 * 5-6 * # 7am UTC, May-June PLEASE ADJUST MONTHS 
+    # - cron: "0 7 * * *"  # 12 AM PDT
 
     # During Standard Time (Nov–Mar), Pacific is UTC-8
     # - cron: "0 8 * * *"  # 12 AM PST
 
-  
+  workflow_dispatch:  # Allows manual triggering
 
 env:
   PAT: ${{ secrets.PAT }}
@@ -41,9 +39,12 @@ env:
   ORG_NAME: ${{ github.repository_owner }}
   REPO_NAME: ${{ github.event.repository.name }}
 
-  
+  # Use the username / email associated with your PGP Key
+  GITHUB_USERNAME: "giozucca"
+  GITHUB_EMAIL: "80614385+giozucca@users.noreply.github.com"
 
   # The columns in the Kanban board that we are interested in
+  # IF YOU CHANGE THIS, BE SURE TO CHANGE THE CRON RANGE AS WELL
   START_DATE: "2025-05-10"
   END_DATE: "2025-06-06"  # Set the end date for the workflow
 
@@ -117,18 +118,37 @@ jobs:
           echo "repository=${REPOSITORY}" >> "$GITHUB_OUTPUT"
           echo "team=${TEAM_NAME}" >> "$GITHUB_OUTPUT"
 
+  get_starter_repo:
+    name: Get Legacy Code URL
+    runs-on: ubuntu-latest
+    needs: [get_team_name, check_date]
+    if: needs.check_date.outputs.continue == 'true'
+    outputs:
+      starter_repo_url: ${{ steps.get_legacy_code_URL.outputs.starter_repo_url }}
+
+    steps:
+      - name: Get Legacy Code URL
+        id: get_legacy_code_URL
+        run: |
+          # This code truncates everything after the first two words combined with a -
+          # For example proj-dining-s25-08 becomes proj-dining
+          REPO_FULL=${{ needs.get_team_name.outputs.repository }}
+          REPO_TRUNCATED=$(printf '%s\n' "$REPO_FULL" | cut -d- -f1-2)
+          echo "$REPO_TRUNCATED"
+
+          echo "starter_repo_url=https://github.com/ucsb-cs156/${REPO_TRUNCATED}" >> $GITHUB_OUTPUT
+
   
   automerge:
     runs-on: ubuntu-latest
-    needs: [get_team_name, check_date]
+    needs: [get_team_name, check_date, get_starter_repo]
     if: needs.check_date.outputs.continue == 'true'
     outputs:
         merged: ${{ steps.merge_check.outputs.merged }}
         merge_conflict: ${{ steps.merge_check.outputs.merge_conflict }}
         no_changes: ${{ steps.merge_check.outputs.no_changes }}
     env:
-        GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
-        
+      GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
     permissions:
         contents: write
     steps:
@@ -157,8 +177,8 @@ jobs:
           EOF
           chmod +x gpg-sign.sh
 
-          git config user.name "giozucca" # FLAG: CHANGE THIS TO YOUR USERNAME
-          git config user.email "80614385+giozucca@users.noreply.github.com" # FLAG: CHANGE THIS TO YOUR EMAIL
+          git config user.name "${{ env.GITHUB_USERNAME }}" # FLAG: CHANGE THIS TO YOUR USERNAME
+          git config user.email "${{ env.GITHUB_EMAIL }}" # FLAG: CHANGE THIS TO YOUR EMAIL
           git config commit.gpgsign true
           git config user.signingkey $GPG_KEY_ID
           git config gpg.program "$(pwd)/gpg-sign.sh"
@@ -166,7 +186,7 @@ jobs:
       - name: Configure starter remote
         run: |
           git remote remove starter || true
-          git remote add starter https://github.com/giozucca/proj-dining-s25-08-TEST-FORK.git # TODO: replace url with var?
+          git remote add starter ${{ needs.get_starter_repo.outputs.starter_repo_url }}.git
 
       - name: Fetch both remotes
         run: |
@@ -242,7 +262,6 @@ jobs:
         env:
           MERGED: ${{ needs.automerge.outputs.merged }}
           MERGE_CONFLICT: ${{ needs.automerge.outputs.merge_conflict }}
-          NO_CHANGES: ${{ needs.automerge.outputs.no_changes }}
 
 
 
@@ -263,9 +282,6 @@ jobs:
                   }
                 },
                 {
-                  "type": "divider"
-                },
-                {
                   "type": "section",
                   "text": {
                     "type": "mrkdwn",
@@ -275,4 +291,4 @@ jobs:
               ]
 
     
-# ${{ steps.set_message.outputs.message }}
+
