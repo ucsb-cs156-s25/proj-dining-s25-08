@@ -125,13 +125,15 @@ jobs:
       - name: Get Legacy Code URL
         id: get_legacy_code_URL
         run: |
+          # This code truncates everything after the first two words combined with a -
+          # For example proj-dining-s25-08 becomes proj-dining
           REPO_FULL=${{ needs.get_team_name.outputs.repository }}
           REPO_FULL="proj-dining-s25-08-TEST-FORK"
           REPO_TRUNCATED=$(printf '%s\n' "$REPO_FULL" | cut -d- -f1-2)
-          echo "$REPO_TRUNCATED"   # → proj-dining
-
-          echo "$REPO_FULL"
           echo "$REPO_TRUNCATED"
+
+          echo "starter_repo_url=https://github.com/ucsb-cs156/$REPO_TRUNCATED"#  >> $GITHUB_OUTPUT
+
           exit 1
           if [[ "${{ needs.get_team_name.outputs.repository }}" = "true"]]; then
             echo "message=✅ Merge successful! ✅" >> $GITHUB_OUTPUT
