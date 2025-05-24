@@ -264,6 +264,7 @@ jobs:
         env:
           MERGED: ${{ needs.automerge.outputs.merged }}
           MERGE_CONFLICT: ${{ needs.automerge.outputs.merge_conflict }}
+          NO_CHANGES: ${{ needs.automerge.outputs.no_changes }}
 
 
 
