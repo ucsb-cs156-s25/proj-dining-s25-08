@@ -1,6 +1,6 @@
 package edu.ucsb.cs156.dining.entities;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.Fetch;
@@ -31,7 +31,7 @@ public class MenuItem {
   private String station;
 
   @ToString.Exclude
-  @JsonIgnore
+  @JsonManagedReference
   @OneToMany(mappedBy = "item")
   @Fetch(FetchMode.JOIN)
   private List<Review> reviews;
