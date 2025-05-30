@@ -1,5 +1,6 @@
 package edu.ucsb.cs156.dining.entities;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import edu.ucsb.cs156.dining.statuses.ModerationStatus;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Max;
@@ -57,6 +58,7 @@ public class Review {
 
     @ManyToOne
     @JoinColumn(name = "item_id", nullable = false)
+    @JsonBackReference
     private MenuItem item;
 
     @ManyToOne
