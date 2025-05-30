@@ -4,7 +4,6 @@ import ProfilePage from "main/pages/ProfilePage";
 import AdminUsersPage from "main/pages/AdminUsersPage";
 
 import PlaceholderIndexPage from "main/pages/Placeholder/PlaceholderIndexPage";
-import PlaceholderCreatePage from "main/pages/Placeholder/PlaceholderCreatePage";
 import PlaceholderEditPage from "main/pages/Placeholder/PlaceholderEditPage";
 
 import ReviewsPage from "main/pages/Reviews/ReviewsPage";
@@ -66,17 +65,12 @@ function App() {
             />
           </>
         )}
-        {hasRole(currentUser, "ROLE_ADMIN") && (
+        {hasRole(currentUser, "ROLE_USER") && (
           <>
             <Route
               exact
               path="/placeholder/edit/:id"
               element={<PlaceholderEditPage />}
-            />
-            <Route
-              exact
-              path="/placeholder/create"
-              element={<PlaceholderCreatePage />}
             />
           </>
         )}

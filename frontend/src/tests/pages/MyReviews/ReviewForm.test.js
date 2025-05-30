@@ -1,6 +1,6 @@
 import React from "react";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
-import { BrowserRouter } from "react-router-dom";
+import { BrowserRouter, MemoryRouter } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "react-query";
 import { ToastContainer } from "react-toastify";
 import PostReviewPage from "main/pages/Reviews/PostReviewPage";
@@ -27,7 +27,9 @@ jest.mock("react-router-dom", () => {
   return {
     ...original,
     useNavigate: () => mockNavigate,
-    useSearchParams: () => [new URLSearchParams("id:42")],
+    useSearchParams: () => [
+      new URLSearchParams("itemId=42&itemName=Spaghetti"),
+    ],
   };
 });
 
@@ -56,13 +58,6 @@ describe("MyReviewsCreatePage - full coverage tests", () => {
     });
     axiosMock.onGet("/api/systemInfo").reply(200, {});
   });
-
-  // test("renders heading with item name from query params", async () => {
-  //   renderWithDefaultRouter();
-  //   // expect(
-  //   //   await screen.findByRole("heading", { name: /review.*spaghetti/i }),
-  //   // ).toBeInTheDocument();
-  // });
 
   test("renders form fields with expected defaults", async () => {
     renderWithDefaultRouter();
@@ -195,14 +190,17 @@ describe("MyReviewsCreatePage - full coverage tests", () => {
   });
 
   test("gracefully handles missing query params without crashing", async () => {
-    // override searchParams to be empty
-    jest.doMock("react-router-dom", () => {
-      const original = jest.requireActual("react-router-dom");
-      return {
-        ...original,
-        useNavigate: () => mockNavigate,
-        useSearchParams: () => [new URLSearchParams("")],
-      };
-    });
+    render(
+      <QueryClientProvider client={queryClient}>
+        <MemoryRouter initialEntries={["/myreviews/create"]}>
+          <PostReviewPage />
+          <ToastContainer />
+        </MemoryRouter>
+      </QueryClientProvider>,
+    );
+
+    expect(
+      await screen.findByRole("heading", { name: /review/i }),
+    ).toBeInTheDocument();
   });
 });
