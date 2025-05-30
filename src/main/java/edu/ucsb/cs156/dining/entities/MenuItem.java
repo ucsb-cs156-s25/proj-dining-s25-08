@@ -1,6 +1,5 @@
 package edu.ucsb.cs156.dining.entities;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.Fetch;
@@ -31,7 +30,6 @@ public class MenuItem {
   private String station;
 
   @ToString.Exclude
-  @JsonIgnore
   @OneToMany(mappedBy = "item")
   @Fetch(FetchMode.JOIN)
   private List<Review> reviews;
